@@ -9593,24 +9593,61 @@ function handleUndoSwipe() {
     const h = new Hammer(c, {
       touchAction: 'none'
     });
-        h.get('pan').set({ direction: Hammer.DIRECTION_HORIZONTAL }); // ✅ Force le pan horizontal uniquement
-        h.on('pan', e => handlePan(e, c));
-        h.on('panend', e => handlePanEnd(e, c));
+    // threshold réduit les faux positifs (petits mouvements)
+    h.get('pan').set({ direction: Hammer.DIRECTION_HORIZONTAL, threshold: 10 }); // ✅ Force le pan horizontal uniquement
+
+    h.on('panstart', e => {
+      c.isPanning = true;
+      c.dataset.panning = '1';
+    });
+    h.on('pan', e => handlePan(e, c));
+    h.on('panend', e => {
+      c.isPanning = false;
+      delete c.dataset.panning;
+      handlePanEnd(e, c);
+    });
     }
-    function handlePan(e, c) {
-        // ✅ FIX CRITIQUE : On supprime complètement deltaY pour éviter le saut sur mobile
-        c.style.transition = 'none';
-        c.style.transform = `translateX(${e.deltaX}px) rotate(${e.deltaX / 20}deg)`;
-        const o = Math.min(Math.abs(e.deltaX) / 100, 1);
-        if (e.deltaX > 0) c.querySelector('.like').style.opacity = o;
-        else c.querySelector('.nope').style.opacity = o;
-    }
-    function handlePanEnd(e, c) {
+  function handlePan(e, c) {
+    // Defensive guards: if an animation is playing or this card is already
+    // processed, ignore pan updates to avoid race conditions.
+    if (state.isAnimating || c.dataset.processed) return;
+
+    // ✅ FIX CRITIQUE : On supprime complètement deltaY pour éviter le saut sur mobile
+    c.style.transition = 'none';
+    c.style.transform = `translateX(${e.deltaX}px) rotate(${e.deltaX / 20}deg)`;
+    const o = Math.min(Math.abs(e.deltaX) / 100, 1);
+    const likeEl = c.querySelector('.like');
+    const nopeEl = c.querySelector('.nope');
+    if (likeEl) likeEl.style.opacity = e.deltaX > 0 ? o : 0;
+    if (nopeEl) nopeEl.style.opacity = e.deltaX > 0 ? 0 : o;
+  }
+
+  function handlePanEnd(e, c) {
     // On remet une transition pour l'animation de retour ou d'éjection
     c.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-    c.querySelector('.like').style.opacity = 0;
-    c.querySelector('.nope').style.opacity = 0;
+    const likeEl = c.querySelector('.like');
+    const nopeEl = c.querySelector('.nope');
+    if (likeEl) likeEl.style.opacity = 0;
+    if (nopeEl) nopeEl.style.opacity = 0;
+
+    // If an animation is running or the card has already been processed,
+    // bail out to avoid double actions (this was causing like+match races).
+    if (state.isAnimating || c.dataset.processed) {
+      // Ensure card returns to neutral visual state
+      c.style.transform = 'translateX(0px) rotate(0deg) scale(1)';
+      return;
+    }
+
+    // Only trigger swipe if displacement exceeds threshold
     if (Math.abs(e.deltaX) > 150) {
+      // Ensure this card is the top of the deck (defensive)
+      const topProduit = state.deck[0] ? state.deck[0].Produit : null;
+      if (c.meatData && c.meatData.Produit && c.meatData.Produit !== topProduit) {
+        // Not the active data card - ignore accidental gesture
+        c.style.transform = 'translateX(0px) rotate(0deg) scale(1)';
+        return;
+      }
+
       animateSwipe(c, e.deltaX > 0 ? 1 : -1);
     } else {
       // Ne PAS vider style.transform (""), ça provoque un saut brutal
@@ -9618,11 +9655,16 @@ function handleUndoSwipe() {
       // explicite qui correspond à l'état CSS .card.is-active (scale(1)).
       c.style.transform = 'translateX(0px) rotate(0deg) scale(1)';
     }
-    }
+  }
 
 function animateSwipe(card, direction) {
-    if (state.isAnimating) { if (state.user.nom === "ulyssecampiglia") console.warn("⛔ Swipe ignoré (animation en cours)."); return; } // ✅ Correction
-    state.isAnimating = true;
+  // Prevent double-processing of the same card
+  if (card.dataset.processed) return;
+
+  if (state.isAnimating) { if (state.user.nom === "ulyssecampiglia") console.warn("⛔ Swipe ignoré (animation en cours)."); return; } // ✅ Correction
+  state.isAnimating = true;
+  card.dataset.processed = '1'; // mark as processed to avoid races
+  card.style.pointerEvents = 'none';
 
     const meat = state.deck[0];
     if (!meat) { 
@@ -9682,17 +9724,31 @@ function animateSwipe(card, direction) {
 /* ========= FIN DU BLOC MODIFIÉ : Logique de Notification d'Astuce ========= */
 /* ========================================================== */
 
-                if (direction === 1 && checkForConvergence()) {
-                    const deckEl = document.querySelector('#card-deck');
-                    const finalCardElement = createCard(meat, deckEl);
-                    if (finalCardElement) {
-                        finalCardElement.classList.add('is-active');
-                        triggerFinalMatchAnimation(finalCardElement);
-                    } else { renderProfileScreen(); }
-                    saveSession();
-                    state.isAnimating = false;
-                    return;
-                }
+        if (direction === 1 && checkForConvergence()) {
+          // Defer final match creation slightly to avoid racing with
+          // other DOM/state updates from animateSwipe. This removes the
+          // tiny timing window where both a like and a convergence
+          // flow could act on the same card.
+          const deckEl = document.querySelector('#card-deck');
+          const savedMeat = meat;
+          setTimeout(() => {
+            // Re-check convergence in case state changed meanwhile
+            if (!checkForConvergence()) {
+              saveSession();
+              return;
+            }
+            const finalCardElement = createCard(savedMeat, deckEl);
+            if (finalCardElement) {
+              finalCardElement.classList.add('is-active');
+              triggerFinalMatchAnimation(finalCardElement);
+            } else {
+              renderProfileScreen();
+            }
+            saveSession();
+          }, 50);
+          state.isAnimating = false;
+          return;
+        }
                 
                 addNextCardToDeckIfNeeded();
                 updateCardStates();
