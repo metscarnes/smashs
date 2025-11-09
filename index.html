@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> SMASHS - Ta Rencontre Charnelle</title>
+    <title>🥩 SMASHS - Ta Rencontre Charnelle</title>
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/metscarnes/bimi-metscarnes/main/Logo%20Mets%20Carn%C3%A9s%20HD.png">
     <link href="https://db.onlinewebfonts.com/c/194ce65461099b38279d03e32740d78e?family=Loyola+Pro+Bold" rel="stylesheet" type="text/css"/>
     <link href="https://fonts.googleapis.com/css2?family=Playpen+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -114,6 +114,7 @@
   top: 0;
   left: 0;
   width: 100%;
+  max-width: 100%; /* ✅ Empêche tout élargissement horizontal */
   height: 100%;
   background-color: #1a1614;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
@@ -124,12 +125,14 @@
   pointer-events: none;
   user-select: none;
   border-radius: 20px;
-  overflow: visible; /* allow info area to grow outside when expanded */
+  overflow-x: hidden; /* ✅ Cache tout débordement horizontal */
+  overflow-y: visible; /* ✅ Permet l'expansion verticale */
   touch-action: pan-y;
   will-change: transform;
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  box-sizing: border-box; /* ✅ Inclut les bordures dans la largeur */
 }
         .card:hover { transform: scale(1.02); box-shadow: 0 15px 50px rgba(0,0,0,0.5); }
         .card.is-next { opacity: 0.5; transform: scale(0.95); }
@@ -183,6 +186,8 @@
   overflow: hidden; /* hide overflow when collapsed */
   transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   background: linear-gradient(180deg, rgba(26,22,20,0) 0%, rgba(26,22,20,0) 60%); /* neutral background so text is readable */
+  width: 100%; /* ✅ Empêche l'élargissement horizontal */
+  box-sizing: border-box; /* ✅ Inclut le padding dans la largeur */
 }
 .card.is-expanded .card-info {
   max-height: 1000px; /* allow to expand to full content */
@@ -212,6 +217,8 @@
     display: flex;
     align-items: flex-start;
     gap: 0.5rem;
+    width: 100%; /* ✅ Empêche l'élargissement */
+    min-width: 0; /* ✅ Permet la contraction du contenu */
 }
 
 .card-text-wrapper {
@@ -225,6 +232,13 @@
     margin: 0;
     text-shadow: 0 2px 8px rgba(0,0,0,0.5);
     letter-spacing: -0.5px;
+    white-space: normal !important; /* ✅ CRITIQUE : Permet le retour à la ligne */
+    word-wrap: break-word !important; /* ✅ Force le retour à la ligne */
+    overflow-wrap: break-word !important; /* ✅ Compatibilité moderne */
+    word-break: break-word !important; /* ✅ Casse les mots longs si nécessaire */
+    max-width: 100% !important; /* ✅ Ne dépasse jamais la largeur du conteneur */
+    hyphens: auto; /* ✅ Ajoute des traits d'union si possible */
+    display: block; /* ✅ Force le comportement de bloc */
 }
 
 .card-location {
@@ -475,7 +489,21 @@
   position: relative;
   overflow-y: auto;
   max-height: calc(100% - 40vh);
-  padding: 1.25rem 1.25rem 2.5rem;
+  /* leave extra bottom padding so a fixed CTA can sit above the edge */
+  padding: 1.25rem 1.25rem 5.5rem;
+}
+
+/* Pin CTA inside expanded card so it never overlaps content and stays visible */
+.card.is-expanded .card-external-link {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 18px;
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 12;
+  /* ensure the animated entrance still works */
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 /* Collapsed: show a compact info preview (name + chevron) */
