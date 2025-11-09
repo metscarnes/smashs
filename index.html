@@ -107,7 +107,7 @@
     max-height: 55vh;
     margin-bottom: 0.5rem; /* ✅ Marge inférieure réduite pour remonter les boutons d'action */
 }
-        .card { position: absolute; width: 100%; height: 100%; background-size: cover; background-position: center; background-color: #1a1614; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5); border: 1px solid var(--border-subtle); opacity: 0; transform: scale(0.95); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; user-select: none; border-radius: 20px; overflow: hidden; }
+        .card { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; background-color: #1a1614; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5); border: 1px solid var(--border-subtle); opacity: 0; transform: scale(0.95); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; user-select: none; border-radius: 20px; overflow: hidden; touch-action: pan-y; will-change: transform; }
         .card:hover { transform: scale(1.02); box-shadow: 0 15px 50px rgba(0,0,0,0.5); }
         .card.is-next { opacity: 0.5; transform: scale(0.95); }
         .card.is-active { opacity: 1; transform: scale(1); cursor: grab; pointer-events: auto; z-index: 10; }
@@ -132,10 +132,10 @@
 /* ========================================================== */
 
 .card {
-    transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1); // ✅ C'est LA clé : on anime la hauteur de la carte entière
+    transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* ✅ C'est LA clé : on anime la hauteur de la carte entière */
 }
 .card.is-expanded {
-    height: 580px; // ✅ On donne une grande hauteur à la carte une fois déployée
+    height: 580px; /* ✅ On donne une grande hauteur à la carte une fois déployée */
 }
 
 .card-gradient-overlay {
@@ -143,7 +143,7 @@
     transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .card.is-expanded .card-gradient-overlay {
-    height: 75%; // ✅ Le dégradé s'agrandit pour une meilleure lisibilité
+    height: 75%; /* ✅ Le dégradé s'agrandit pour une meilleure lisibilité */
 }
 
 /* ✅ La solution : on ancre bien par le bas et on anime la HAUTEUR du bloc d'info */
@@ -204,14 +204,14 @@
     font-style: italic;
     text-shadow: 0 1px 3px rgba(0,0,0,0.6);
     display: -webkit-box;
-    -webkit-line-clamp: 1; // ✅ Une seule ligne visible, avec "..." automatique
+    -webkit-line-clamp: 1; /* ✅ Une seule ligne visible, avec "..." automatique */
     -webkit-box-orient: vertical;
     overflow: hidden;
     transition: all 0.4s ease;
 }
 
 .card.is-expanded .card-bio {
-    -webkit-line-clamp: 20; // ✅ On retire la limite pour tout afficher
+    -webkit-line-clamp: 20; /* ✅ On retire la limite pour tout afficher */
 }
 
 .card-expand-chevron {
@@ -222,7 +222,7 @@
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .card.is-expanded .card-expand-chevron {
-    transform: rotate(180deg); // ✅ La flèche tourne
+    transform: rotate(180deg); /* ✅ La flèche tourne */
 }
 
 .card-details-arrow {
@@ -261,42 +261,6 @@
 /* ========================================================== */
 /* ========= FIN DU BLOC FINAL : .card-info et expansion ========= */
 /* ========================================================== */
-
-.card-external-link {
-    display: inline-block;
-    background: var(--accent);
-    color: var(--dark);
-    text-decoration: none;
-    padding: 0.8rem 1.5rem;
-    font-family: 'Loyola Pro Bold', serif;
-    font-size: 0.9rem;
-    text-align: center;
-    border-radius: 4px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.4);
-    transition: opacity 0.4s ease, transform 0.4s ease;
-    opacity: 0;
-    transform: translateY(10px);
-    pointer-events: none;
-}
-
-.card-external-link:hover {
-    background: var(--primary);
-    transform: translateY(-2px) !important;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-}
-
-.card.is-expanded .card-external-link {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
-}
-
-/* ========================================================== */
-/* ========= FIN DU BLOC FINAL : .card-info et expansion ========= */
-/* ========================================================== */
-        .card-name { font-size: 1.8rem; font-weight: 700; margin: 0; text-shadow: 0 2px 8px rgba(0,0,0,0.5); letter-spacing: -0.5px; }
-        .card-location { display: flex; align-items: center; gap: 6px; font-size: 0.95rem; color: rgba(245,241,232,0.85); margin-bottom: 12px; }
-        .card-bio { margin: 12px 0; font-size: 0.95rem; line-height: 1.5; color: rgba(245,241,232,0.9); font-style: italic; text-shadow: 0 1px 3px rgba(0,0,0,0.6); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
         .card-details-arrow { font-size: 2rem; cursor: pointer; color: white; background: rgba(255,255,255,0.2); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: transform 0.3s ease; flex-shrink: 0; }
         .card-details-arrow:hover { transform: scale(1.1); }
         .profile-radar-container { width: 150px; height: 150px; position: relative; }
@@ -553,31 +517,35 @@
     .convergence-gauge-container {
         margin-top: 1.5rem; /* ✅ */
     }
-}
+@media (max-width: 500px) {
+  /* Sur mobile, on donne un peu d'espace au-dessus pour que le pop-up ne soit pas collé au header */
+  .convergence-gauge-container {
+    margin-top: 1.5rem; /* ✅ */
+  }
 
-    #coach-popup {
-        /* On change complètement le positionnement pour le mettre AU-DESSUS */
-        top: -10px; /* ✅ Remonte le pop-up */
-        left: 50%; /* ✅ Centre horizontalement par rapport au parent */
-        right: auto; /* ✅ On annule la position à droite */
-        transform: translateX(-50%) translateY(-100%); /* ✅ Centrage horizontal parfait et le place au-dessus */
-        font-size: 0.75rem; /* On le rend un peu plus petit sur mobile */
-    }
+  #coach-popup {
+    /* On change complètement le positionnement pour le mettre AU-DESSUS */
+    top: -10px; /* ✅ Remonte le pop-up */
+    left: 50%; /* ✅ Centre horizontalement par rapport au parent */
+    right: auto; /* ✅ On annule la position à droite */
+    transform: translateX(-50%) translateY(-100%); /* ✅ Centrage horizontal parfait et le place au-dessus */
+    font-size: 0.75rem; /* On le rend un peu plus petit sur mobile */
+  }
 
-    #coach-popup::after {
-        /* On réoriente la flèche pour qu'elle pointe vers le BAS */
-        top: 100%; /* ✅ Se place en bas du pop-up */
-        left: 50%; /* ✅ Se centre horizontalement */
-        margin-top: 0;
-        margin-left: -5px;
-        /* La magie est ici : on change la bordure qui a la couleur */
-        border-color: #e34033 transparent transparent transparent; /* ✅ */
-    }
+  #coach-popup::after {
+    /* On réoriente la flèche pour qu'elle pointe vers le BAS */
+    top: 100%; /* ✅ Se place en bas du pop-up */
+    left: 50%; /* ✅ Se centre horizontalement */
+    margin-top: 0;
+    margin-left: -5px;
+    /* La magie est ici : on change la bordure qui a la couleur */
+    border-color: #e34033 transparent transparent transparent; /* ✅ */
+  }
 
-    /* On s'assure que l'animation de slide-in vient du haut */
-    .convergence-gauge-label.has-hint #coach-popup {
-        transform: translateX(-50%) translateY(-100%) translateY(-5px); /* ✅ Position de départ */
-    }
+  /* On s'assure que l'animation de slide-in vient du haut */
+  .convergence-gauge-label.has-hint #coach-popup {
+    transform: translateX(-50%) translateY(-100%) translateY(-5px); /* ✅ Position de départ */
+  }
 }
 
 /* ========================================================== */
@@ -714,7 +682,7 @@
     display: inline-block;
     text-decoration: none;
     margin-bottom: 1.5rem;
-    animation: pulse-cta 2.5s infinite; // ✅ C'est cette ligne qui active la pulsation.
+    animation: pulse-cta 2.5s infinite; /* ✅ C'est cette ligne qui active la pulsation. */
 }
 .btn-cta-profile:hover {
     background: var(--primary);
@@ -741,7 +709,7 @@
     
     /* Modifications spécifiques */
     margin-top: 1rem;
-    /* Pas de propriété "animation" pour que ce bouton reste statique */ // ✅
+    /* Pas de propriété "animation" pour que ce bouton reste statique */ /* ✅ */
 }
 #continue-swiping-btn:hover {
     background: var(--primary);
@@ -946,7 +914,7 @@
 #profile-radar-final .radar-shape {
     /* On ajoute une deuxième animation pour le faire pulser après coup */
     animation: grow-shape 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) 1.2s forwards, 
-               pulse-glow 3s ease-in-out 2.5s infinite; // ✅
+               pulse-glow 3s ease-in-out 2.5s infinite; /* ✅ */
 }
 
 @keyframes pulse-glow {
@@ -9617,9 +9585,40 @@ function handleUndoSwipe() {
     showFeedbackMessage(`"${meat.Produit}" est de retour !`);
     saveSession();
 }
-    function initCardHammer(c) { if (c.hammerInitialized) return; c.hammerInitialized = true; const h = new Hammer(c); h.on('pan', e => handlePan(e, c)); h.on('panend', e => handlePanEnd(e, c)); }
-    function handlePan(e, c) { c.style.transition = 'none'; c.style.transform = `translate(${e.deltaX}px, ${e.deltaY}px) rotate(${e.deltaX / 20}deg)`; const o = Math.min(Math.abs(e.deltaX) / 100, 1); if (e.deltaX > 0) c.querySelector('.like').style.opacity = o; else c.querySelector('.nope').style.opacity = o; }
-    function handlePanEnd(e, c) { c.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'; c.querySelector('.like').style.opacity = 0; c.querySelector('.nope').style.opacity = 0; if (Math.abs(e.deltaX) > 150) { animateSwipe(c, e.deltaX > 0 ? 1 : -1); } else { c.style.transform = ''; } }
+    function initCardHammer(c) {
+        if (c.hammerInitialized) return;
+        c.hammerInitialized = true;
+    // touchAction 'none' empêche le navigateur d'interpréter les gestes
+    // (évite que le scroll vertical bloque / fasse 'sauter' la carte)
+    const h = new Hammer(c, {
+      touchAction: 'none'
+    });
+        h.get('pan').set({ direction: Hammer.DIRECTION_HORIZONTAL }); // ✅ Force le pan horizontal uniquement
+        h.on('pan', e => handlePan(e, c));
+        h.on('panend', e => handlePanEnd(e, c));
+    }
+    function handlePan(e, c) {
+        // ✅ FIX CRITIQUE : On supprime complètement deltaY pour éviter le saut sur mobile
+        c.style.transition = 'none';
+        c.style.transform = `translateX(${e.deltaX}px) rotate(${e.deltaX / 20}deg)`;
+        const o = Math.min(Math.abs(e.deltaX) / 100, 1);
+        if (e.deltaX > 0) c.querySelector('.like').style.opacity = o;
+        else c.querySelector('.nope').style.opacity = o;
+    }
+    function handlePanEnd(e, c) {
+    // On remet une transition pour l'animation de retour ou d'éjection
+    c.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+    c.querySelector('.like').style.opacity = 0;
+    c.querySelector('.nope').style.opacity = 0;
+    if (Math.abs(e.deltaX) > 150) {
+      animateSwipe(c, e.deltaX > 0 ? 1 : -1);
+    } else {
+      // Ne PAS vider style.transform (""), ça provoque un saut brutal
+      // et peut laisser la carte collée à gauche. On remet une valeur
+      // explicite qui correspond à l'état CSS .card.is-active (scale(1)).
+      c.style.transform = 'translateX(0px) rotate(0deg) scale(1)';
+    }
+    }
 
 function animateSwipe(card, direction) {
     if (state.isAnimating) { if (state.user.nom === "ulyssecampiglia") console.warn("⛔ Swipe ignoré (animation en cours)."); return; } // ✅ Correction
@@ -9965,9 +9964,11 @@ function activateDebugTools() {
         }, 3000);
     }
 
-    init();
+  init();
 
-})();
+  })(); // Close the main IIFE
+
+}); // Close the DOMContentLoaded event listener
 
 // ============================================================
 // CONSOLE VISUELLE M.E.T.S ET GESTION CLAVIER
@@ -10033,13 +10034,13 @@ function activateDebugTools() {
     const line = document.createElement("div");
     line.innerHTML = `<div style="margin-bottom:4px;border-bottom:1px dashed #444;padding-bottom:2px;"><span style="color:#888;">[${entry.time}]</span> <span style="color:#cc8956;">${entry.type}</span> <span style="color:#F5F1E8;">${entry.produit}</span><br><span style="color:#F5F1E8;">${entry.phrase}</span><br><span style="color:#777;">${entry.style} • ${entry.phase}</span></div>`;
     logContainer.prepend(line);
+    // Trim the log to the most recent 50 entries
     while (logContainer.children.length > 50) {
       logContainer.removeChild(logContainer.lastChild);
     }
   };
 
-})();
-});
+})(); // Close the debug panel IIFE
+
 </script>
 </body>
-</html>
