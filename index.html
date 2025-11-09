@@ -8931,9 +8931,9 @@ if (state.profile.Gout > 7.5 && state.profile.Tendrete < 5) {
     const logoUrl = "https://raw.githubusercontent.com/metscarnes/bimi-metscarnes/main/Logo%20Mets%20Carn%C3%A9s%20HD.png";
     const meatImageUrl = bestMatch ? bestMatch.image_url : "https://via.placeholder.com/150/1a1614/d4b896?text=🥩";
 
-    const ctaHtml = bestMatch ? 
-        `<a href="${bestMatch.product_url}" target="_blank" class="btn-cta-profile">Découvrez ${formatProduitAvecArticle(bestMatch.Produit)}</a>` :
-        ``;
+  const ctaHtml = bestMatch ? 
+    `<a href="#" class="btn-cta-profile" data-produit="${encodeURIComponent(bestMatch.Produit)}">Découvrez ${formatProduitAvecArticle(bestMatch.Produit)}</a>` :
+    ``;
 
     DOM.appScreens.profile.innerHTML = `
         <div style="text-align: center; max-width: 700px; margin: auto; display: flex; flex-direction: column; justify-content: center; min-height: 60vh;">
@@ -8966,10 +8966,19 @@ if (state.profile.Gout > 7.5 && state.profile.Tendrete < 5) {
         
     drawRadar(state.profile, 'profile-radar-final');
     
-    DOM.appScreens.profile.querySelector('#continue-swiping-btn').addEventListener('click', () => {
+  DOM.appScreens.profile.querySelector('#continue-swiping-btn').addEventListener('click', () => {
         showAppScreen('swipe');
         renderSwipe();
     });
+  // CTA produit : ouvrir modal plutôt que nouvelle page
+  const cta = DOM.appScreens.profile.querySelector('.btn-cta-profile');
+  if (cta) {
+    cta.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      try { showModal(bestMatch); } catch (err) { window.location.href = bestMatch.product_url || '#'; }
+    });
+  }
     
     showAppScreen('profile');
 }
@@ -9044,9 +9053,9 @@ function createCard(m, deckElement) {
                     <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
             </div>
-            <a href="${m.product_url || '#'}" target="_blank" class="card-external-link">
-                Ton rendez-vous est ici ↗
-            </a>
+      <a href="#" class="card-external-link" data-produit="${encodeURIComponent(m.Produit)}">
+        Ton rendez-vous est ici ↗
+      </a>
         </div>
     `;
     
@@ -9060,11 +9069,14 @@ function createCard(m, deckElement) {
         });
     }
 
-    if (externalLink) {
-        externalLink.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
-    }
+  if (externalLink) {
+    externalLink.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      // Open product modal in-app instead of navigating away / opening new tab
+      try { showModal(m); } catch (err) { window.location.href = m.product_url || '#'; }
+    });
+  }
     
     d.appendChild(c);
     
@@ -9330,7 +9342,7 @@ function renderResultsScreen() {
     if (state.convergenceMatches.length > 0) {
         const userLogoUrl = "https://raw.githubusercontent.com/metscarnes/bimi-metscarnes/main/Logo%20Mets%20Carn%C3%A9s%20HD.png";
         const sortedMatches = [...state.convergenceMatches].sort((a, b) => b.score - a.score);
-        const listItems = sortedMatches.map((match, index) => {
+    const listItems = sortedMatches.map((match, index) => {
             const product = match.product;
             const compatibility = Math.min(99, Math.round(match.score));
             return `
@@ -9342,7 +9354,7 @@ function renderResultsScreen() {
                     <div class="match-gallery-info">
                         <h3>${product.Produit}</h3>
                         <p class="match-compatibility">🏆 Profil idéal validé à ${compatibility}%</p>
-                        <a href="${product.product_url}" target="_blank" class="btn-view-product">Ton date t'attend ! ➔</a>
+            <a href="#" class="btn-view-product" data-index="${index}">Ton date t'attend ! ➔</a>
                     </div>
                 </li>
             `;
@@ -9371,7 +9383,7 @@ function renderResultsScreen() {
         </div>
     `;
 
-    // ✅ LOGIQUE DU NOUVEAU BOUTON AJOUTÉE ICI
+  // ✅ LOGIQUE DU NOUVEAU BOUTON AJOUTÉE ICI
     resultsContainer.querySelector('#view-profile-from-results-btn').addEventListener('click', () => {
         renderProfileScreen(); // Appelle l'écran de profil
     });
@@ -9380,6 +9392,20 @@ function renderResultsScreen() {
         showAppScreen('swipe');
         renderSwipe(); // On s'assure de bien re-render l'écran de swipe
     });
+
+  // Attach product modal handlers for result items (SPA behaviour)
+  const resultButtons = resultsContainer.querySelectorAll('.btn-view-product');
+  resultButtons.forEach(btn => {
+    const idx = parseInt(btn.dataset.index, 10);
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const match = sortedMatches[idx];
+      if (match && match.product) {
+        try { showModal(match.product); } catch (err) { window.location.href = match.product.product_url || '#'; }
+      }
+    });
+  });
 
     showAppScreen('results');
 }
@@ -9599,11 +9625,21 @@ function handleUndoSwipe() {
     h.on('panstart', e => {
       c.isPanning = true;
       c.dataset.panning = '1';
+      // Prevent native touch scrolling while interacting with the card
+      // We attach a non-passive touchmove listener so we can call preventDefault
+      const prevent = function(ev) { ev.preventDefault(); };
+      c._preventTouchMove = prevent;
+      document.addEventListener('touchmove', prevent, { passive: false });
     });
     h.on('pan', e => handlePan(e, c));
     h.on('panend', e => {
       c.isPanning = false;
       delete c.dataset.panning;
+      // remove the temporary touchmove blocker
+      if (c._preventTouchMove) {
+        try { document.removeEventListener('touchmove', c._preventTouchMove, { passive: false }); } catch (err) { document.removeEventListener('touchmove', c._preventTouchMove); }
+        delete c._preventTouchMove;
+      }
       handlePanEnd(e, c);
     });
     }
@@ -9725,27 +9761,27 @@ function animateSwipe(card, direction) {
 /* ========================================================== */
 
         if (direction === 1 && checkForConvergence()) {
-          // Defer final match creation slightly to avoid racing with
-          // other DOM/state updates from animateSwipe. This removes the
-          // tiny timing window where both a like and a convergence
-          // flow could act on the same card.
+          // Defer final match creation to the next animation frames to
+          // avoid racing with other DOM/state updates from animateSwipe.
           const deckEl = document.querySelector('#card-deck');
           const savedMeat = meat;
-          setTimeout(() => {
-            // Re-check convergence in case state changed meanwhile
-            if (!checkForConvergence()) {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              // Re-check convergence in case state changed meanwhile
+              if (!checkForConvergence()) {
+                saveSession();
+                return;
+              }
+              const finalCardElement = createCard(savedMeat, deckEl);
+              if (finalCardElement) {
+                finalCardElement.classList.add('is-active');
+                triggerFinalMatchAnimation(finalCardElement);
+              } else {
+                renderProfileScreen();
+              }
               saveSession();
-              return;
-            }
-            const finalCardElement = createCard(savedMeat, deckEl);
-            if (finalCardElement) {
-              finalCardElement.classList.add('is-active');
-              triggerFinalMatchAnimation(finalCardElement);
-            } else {
-              renderProfileScreen();
-            }
-            saveSession();
-          }, 50);
+            });
+          });
           state.isAnimating = false;
           return;
         }
