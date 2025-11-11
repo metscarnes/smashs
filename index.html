@@ -8515,16 +8515,20 @@ function transitionToLoading() {
 /* ========= DÉBUT DU BLOC MODIFIÉ : MATCH_PHRASES ========= */
 /* ========================================================== */
 
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+/* =-=-=-=-=-= DÉBUT BLOC MODIFIÉ : MATCH_PHRASES (v2) =-=-=-=-=-= */
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+
 const MATCH_PHRASES = [
-    "Apparemment, {prenom}, tous tes choix de vie t'ont mené{e} inexorablement vers {produit_avec_article}. Étonnant. 🤷",
+    "Apparemment, {prenom}, tous tes choix de vie t'ont mené{e_accord} inexorablement vers {produit_avec_article}. Étonnant. 🤷", // ✅ Utilisation de {e_accord}
     "C'est acté. {produit_avec_article} et toi {prenom}, c'est plus crédible que ton dernier crush Tinder.",
     "Félicitations, {prenom}. T'as trouvé ta moitié... pour le dîner. C'est déjà ça de pris. 😉",
     "On dirait bien que {produit_avec_article} est le seul morceau qui supporte ton mordant. Profites-en, {prenom}. 😜",
     "C'est un match ! {prenom}, t'as ENFIN quelqu'un à présenter à tes parents : {produit_avec_article}. 🙏",
     "Certains trouvent l'amour. Toi {prenom}, t'as trouvé {produit_avec_article}. Bon, c'est déjà ça. 🥲",
-    "Voilà, {prenom}. Ta quête de sens s'arrête ici. Sur un lit {produit_de}. Pas mal non ? C'est Français ? 😏", // ✅ Utilisation de {produit_de}
+    "Voilà, {prenom}. Ta quête de sens s'arrête ici. Sur un lit {produit_de}. Pas mal non ? C'est Français ? 😏",
     "Certains trouvent l'âme sœur. Toi, {prenom}, t'as trouvé {produit_avec_article}. Chacun ses priorités. 🎯",
-    "Après une analyse psychologique poussée, il s'avère que t'avais juste besoin {produit_de} dans ta vie, {prenom}. 🤓", // ✅ Utilisation de {produit_de}
+    "Après une analyse psychologique poussée, il s'avère que t'avais juste besoin {produit_de} dans ta vie, {prenom}. 🤓",
     "C'est officiel ! {prenom} et {produit_avec_article}, c'est une love story. Enfin, pour 20 minutes. 🥳",
     "De rien hein, {prenom}. On t'a juste trouvé le seul plat capable de te faire plaisir : {produit_avec_article}. Facile. 💅",
     "Finalement, {prenom}, tout ce temps passé à swiper n'aura pas été vain. Tu repars avec {produit_avec_article}. 🏆",
@@ -8533,9 +8537,9 @@ const MATCH_PHRASES = [
     "Arrête de chercher, {prenom}. Ce soir, c'est {produit_avec_article} et demain... on verra 😉 (Je suis fatigué patron)."
 ];
 
-/* ========================================================== */
-/* ========= FIN DU BLOC MODIFIÉ : MATCH_PHRASES ========= */
-/* ========================================================== */
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+/* =-=-=-=-=-=- FIN BLOC MODIFIÉ : MATCH_PHRASES (v2) =-=-=-=-=-=- */
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
 
 const PROFILE_PUNCHLINES = [
     "En résumé : t'as des goûts ... suspects . Mais au moins t'assumes.",
@@ -8568,14 +8572,41 @@ function getArticleForProduit(produitBrut) {
     return "le";
 }
 
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+/* =-=-=-=-=-= DÉBUT BLOC MODIFIÉ : Contraction (v5 - Logique finale) =-=-=-=-=-= */
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+
 function formatProduitContractionDe(produitBrut) {
     if (!produitBrut) return "";
-    const article = getArticleForProduit(produitBrut);
     const p = produitBrut.trim().toLowerCase();
-    if (article === 'le') return `du ${p}`;
-    if (article === 'la') return `de la ${p}`;
-    return `de l’${p}`; // ✅ Gère "l'"
+    
+    // ✅ Nouvelle logique beaucoup plus robuste
+    
+    // Cas 1 : Le nom est déjà composé (ex: "joue de boeuf"). On ne touche à rien.
+    if (p.includes(" de ") || p.includes(" d'")) {
+        return `de ${p}`;
+    }
+
+    // Cas 2 : Le nom commence par une voyelle (ex: "osso bucco"). On utilise "d'".
+    const voyelles = "aàâäeéèêëiïîoôöuùûüyh";
+    if (voyelles.includes(p[0])) {
+        return `d’${p}`;
+    }
+
+    // Cas 3 : Le nom est simple et ne commence pas par une voyelle.
+    // On utilise la fonction d'article pour déterminer si c'est "du" ou "de la".
+    const articleComplet = formatProduitAvecArticle(produitBrut).split(' ')[0];
+    
+    if (articleComplet === 'le') return `du ${p}`;
+    if (articleComplet === 'la') return `de la ${p}`;
+    
+    // Cas par défaut (ne devrait quasiment jamais arriver)
+    return `de ${p}`;
 }
+
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+/* =-=-=-=-=-=- FIN BLOC MODIFIÉ : Contraction (v5 - Logique finale) =-=-=-=-=-=- */
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
 
 /* ========================================================== */
 /* ========= FIN DU BLOC À AJOUTER : Fonctions d'Articles ========= */
@@ -8585,17 +8616,78 @@ function formatProduitContractionDe(produitBrut) {
 "On analyse tes choix de vie", 
 "Je suis fatigué patron"];
 
-    function formatProduitAvecArticle(produitBrut) {
-      if (!produitBrut) return "";
-      const p = produitBrut.trim();
-      const lower = p.toLowerCase();
-      const voyelles = "aàâäeéèêëiïîoôöuùûüyh";
-      if (voyelles.includes(lower[0])) return "l’" + lower;
-      const femCandidats = ["aiguillette", "araignée", "bavette", "côte", "cote", "poitrine", "épaule", "selle", "viande"];
-      if (femCandidats.some(f => lower.startsWith(f))) return "la " + lower;
-      return "le " + lower;
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+/* =-=-=-=-=-= DÉBUT BLOC À AJOUTER : Réintégration de formatProduitPourLieu =-=-=-=-=-= */
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+
+function formatProduitPourLieu(produitBrut) {
+    if (!produitBrut) return "";
+    const p = produitBrut.trim().toLowerCase();
+    const voyelles = "aàâäeéèêëiïîoôöuùûüyh";
+
+    // ✅ Gère le 'h' aspiré pour éviter "d'haut de cuisse"
+    if (p.startsWith('haut')) {
+        return `de ${p}`;
     }
 
+    if (voyelles.includes(p[0])) {
+        return `d’${p}`;
+    }
+    return `de ${p}`;
+}
+
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+/* =-=-=-=-=-=- FIN BLOC À AJOUTER : Réintégration de formatProduitPourLieu =-=-=-=-=-=- */
+
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+/* =-=-=-=-=-= DÉBUT BLOC MODIFIÉ : Grammaire Basée sur les Données =-=-=-=-=-= */
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+
+function formatProduitAvecArticle(product) { // ✅ Accepte l'objet produit entier
+      if (!product || !product.Produit) return "";
+      const p = product.Produit.trim();
+      const lower = p.toLowerCase();
+      
+      if (lower.startsWith('haut')) {
+          return "le " + lower;
+      }
+
+      const voyelles = "aàâäeéèêëiïîoôöuùûüyh";
+      if (voyelles.includes(lower[0])) return "l’" + lower;
+      
+      // ✅ La logique se base maintenant sur product.Genre, la liste femCandidats est supprimée.
+      if (product.Genre && product.Genre.toLowerCase() === 'féminin') {
+          return "la " + lower;
+      }
+      
+      return "le " + lower;
+}
+
+function formatProduitContractionDe(product) { // ✅ Accepte l'objet produit entier
+    if (!product || !product.Produit) return "";
+    const p = product.Produit.trim().toLowerCase();
+    
+    const voyelles = "aàâäeéèêëiïîoôöuùûüyh";
+    if (voyelles.includes(p[0])) {
+        return `d’${p}`;
+    }
+
+    if (p.includes(" de ") || p.includes(" d'")) {
+        return `de ${p}`;
+    }
+
+    // ✅ La logique se base maintenant sur product.Genre.
+    if (product.Genre && product.Genre.toLowerCase() === 'féminin') {
+        return `de la ${p}`;
+    }
+    
+    return `du ${p}`;
+}
+
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+/* =-=-=-=-=-=- FIN BLOC MODIFIÉ : Grammaire Basée sur les Données =-=-=-=-=-=- */
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
 function formatText(template, data) {
     if (!template) return "";
     let result = template;
@@ -8855,22 +8947,22 @@ function checkForConvergence() {
         return chosenPhrase;
     }
 
-/* ========================================================== */
-/* ========= DÉBUT DU BLOC MODIFIÉ : triggerFinalMatchAnimation ========= */
-/* ========================================================== */
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+/* =-=-=-=-=-= DÉBUT BLOC MODIFIÉ : triggerFinalMatchAnimation (v4) =-=-=-=-=-= */
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
 
 function triggerFinalMatchAnimation(finalCard) {
-    if (state.user.nom === "ulyssecampiglia") console.log("🎉 CONVERGENCE ATTEINTE ! Lancement de l'animation de Match."); // ✅ Correction
+    if (state.user.nom === "ulyssecampiglia") console.log("🎉 CONVERGENCE ATTEINTE ! Lancement de l'animation de Match.");
     const deck = document.querySelector('.card-deck');
     if (deck) deck.style.pointerEvents = 'none';
 
     const meatData = finalCard.meatData; 
 
     const alreadyExists = state.convergenceMatches.some(match => match.product.Produit === meatData.Produit);
-if (!alreadyExists) {
+    if (!alreadyExists) {
         const score = calculateScore(meatData, state.profile);
         state.convergenceMatches.push({ product: meatData, score: score });
-        if (state.user.nom === "ulyssecampiglia") console.log(`🏆 Match de convergence ajouté : ${meatData.Produit}`); // ✅ Correction
+        if (state.user.nom === "ulyssecampiglia") console.log(`🏆 Match de convergence ajouté : ${meatData.Produit}`);
     }
     
     const matchOverlay = document.getElementById('match-screen-overlay');
@@ -8901,13 +8993,29 @@ if (!alreadyExists) {
 
     const formatData = {
         prenom: state.user.nom ? state.user.nom.charAt(0).toUpperCase() + state.user.nom.slice(1) : "Vous",
-        produit_avec_article: formatProduitAvecArticle(meatData.Produit),
-        produit_de: formatProduitContractionDe(meatData.Produit), // ✅ On ajoute la nouvelle donnée pour le placeholder {produit_de}
-        e: state.user.genre === 'Madame' ? 'e' : ''
+        produit_avec_article: formatProduitAvecArticle(meatData), // ✅ On passe l'objet entier
+        produit_de: formatProduitContractionDe(meatData), // ✅ On passe l'objet entier
+        produit_lieu: formatProduitPourLieu(meatData.Produit),
+        e_accord: state.user.genre === 'Madame' ? 'e' : ''
     };
     
     const phraseTemplate = getUniqueMatchPhrase();
     const finalPhrase = formatText(phraseTemplate, formatData);
+
+    if (state.user.nom === "ulyssecampiglia") {
+        console.log("💬 Phrase de Match générée:", `"${finalPhrase}"`);
+        
+        if (typeof logMETS === "function") {
+            logMETS({
+                time: new Date().toLocaleTimeString(),
+                produit: formatProduitAvecArticle(meatData), // ✅ On passe l'objet entier
+                type: "MATCH",
+                phrase: finalPhrase,
+                style: "—",
+                phase: "convergence"
+            });
+        }
+    }
 
     userPfp.style.backgroundImage = `url('${userLogoUrl}')`;
     meatPfp.style.backgroundImage = `url('${meatData.image_url || "https://via.placeholder.com/450x600/1a1614/d4b896?text=🥩"}')`;
@@ -8970,10 +9078,9 @@ if (!alreadyExists) {
     }, '-=200');
 }
 
-/* ========================================================== */
-/* ========= FIN DU BLOC MODIFIÉ : triggerFinalMatchAnimation ========= */
-/* ========================================================== */
-
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+/* =-=-=-=-=-=- FIN BLOC MODIFIÉ : triggerFinalMatchAnimation (v4) =-=-=-=-=-=- */
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
 
 /* ========================================================== */
 /* ========= DÉBUT DU BLOC MODIFIÉ : refreshDeck ========= */
@@ -10312,6 +10419,10 @@ function activateDebugTools() {
 }); // Close the DOMContentLoaded event listener
 
 
+/* ========================================================== */
+/* ========= DÉBUT DU BLOC MODIFIÉ : Panneau M.E.T.S Debug (Bouton Copier Corrigé) ========= */
+/* ========================================================== */
+
 (function () {
   const panel = document.createElement("div");
   panel.id = "mets-debug-panel";
@@ -10350,7 +10461,8 @@ function activateDebugTools() {
       setTimeout(() => (copyBtn.textContent = "📋 Copier"), 1500);
       return;
     }
-    const text = [...journal].reverse().map(e => `[${e.time}] ${e.type} ${e.produit}\n${e.phrase}\n${e.style} • ${e.phase}`).join("\n\n");
+    // ✅ La logique de formatage du texte a été corrigée pour correspondre au format actuel des logs.
+    const text = [...journal].reverse().map(e => `[${e.time}] ${e.type} ${e.produit}\n${e.phrase}\n${e.style || '—'} • ${e.phase}`).join("\n\n");
     navigator.clipboard.writeText(text).then(() => {
         copyBtn.textContent = "✅ Copié !";
         setTimeout(() => (copyBtn.textContent = "📋 Copier"), 1500);
@@ -10373,13 +10485,16 @@ function activateDebugTools() {
     const line = document.createElement("div");
     line.innerHTML = `<div style="margin-bottom:4px;border-bottom:1px dashed #444;padding-bottom:2px;"><span style="color:#888;">[${entry.time}]</span> <span style="color:#cc8956;">${entry.type}</span> <span style="color:#F5F1E8;">${entry.produit}</span><br><span style="color:#F5F1E8;">${entry.phrase}</span><br><span style="color:#777;">${entry.style} • ${entry.phase}</span></div>`;
     logContainer.prepend(line);
-    // Trim the log to the most recent 50 entries
     while (logContainer.children.length > 50) {
       logContainer.removeChild(logContainer.lastChild);
     }
   };
 
 })(); // Close the debug panel IIFE
+
+/* ========================================================== */
+/* ========= FIN DU BLOC MODIFIÉ : Panneau M.E.T.S Debug (Bouton Copier Corrigé) ========= */
+/* ========================================================== */
 
 </script>
 </body>
