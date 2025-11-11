@@ -7492,7 +7492,7 @@ const DOM = {
     "bio_template": "Je suis la légèreté et la régularité. {{alt_f: Fine et régulière|alt_m: Fin et régulier}}, je demande de l'attention et de la justesse. Je suis une viande claire, {{adj_f: précise|adj_m: précis}}, {{adj_f: équilibrée|adj_m: équilibré}}. Je suis la beauté d'une interface épurée."
   },
   {
-    "Produit": "Roti de porc florida fumé etarni de fruits secs",
+    "Produit": "Roti de porc Florida fumé garni de fruits secs",
     "product_url": "https://metscarnes.odoo.com/shop/roti-de-porc-florida-fume-et-garni-de-fruits-secs-133",
     "image_url": "https://metscarnes.odoo.com/web/image/product.product/133/image_1920",
     "Categorie": "Porc",
@@ -8511,6 +8511,10 @@ function transitionToLoading() {
 
 
 
+/* ========================================================== */
+/* ========= DÉBUT DU BLOC MODIFIÉ : MATCH_PHRASES ========= */
+/* ========================================================== */
+
 const MATCH_PHRASES = [
     "Apparemment, {prenom}, tous tes choix de vie t'ont mené{e} inexorablement vers {produit_avec_article}. Étonnant. 🤷",
     "C'est acté. {produit_avec_article} et toi {prenom}, c'est plus crédible que ton dernier crush Tinder.",
@@ -8518,10 +8522,10 @@ const MATCH_PHRASES = [
     "On dirait bien que {produit_avec_article} est le seul morceau qui supporte ton mordant. Profites-en, {prenom}. 😜",
     "C'est un match ! {prenom}, t'as ENFIN quelqu'un à présenter à tes parents : {produit_avec_article}. 🙏",
     "Certains trouvent l'amour. Toi {prenom}, t'as trouvé {produit_avec_article}. Bon, c'est déjà ça. 🥲",
-    "Voilà, {prenom}. Ta quête de sens s'arrête ici. Sur un lit de... {produit_avec_article}. Pas mal non ? C'est Français ? 😏",
+    "Voilà, {prenom}. Ta quête de sens s'arrête ici. Sur un lit {produit_de}. Pas mal non ? C'est Français ? 😏", // ✅ Utilisation de {produit_de}
     "Certains trouvent l'âme sœur. Toi, {prenom}, t'as trouvé {produit_avec_article}. Chacun ses priorités. 🎯",
-    "Après une analyse psychologique poussée, il s'avère que t'avais juste besoin de {produit_avec_article} dans ta vie, {prenom}. 🤓",
-"C'est officiel ! {prenom} et {produit_avec_article}, c'est une love story. Enfin, pour 20 minutes. 🥳",
+    "Après une analyse psychologique poussée, il s'avère que t'avais juste besoin {produit_de} dans ta vie, {prenom}. 🤓", // ✅ Utilisation de {produit_de}
+    "C'est officiel ! {prenom} et {produit_avec_article}, c'est une love story. Enfin, pour 20 minutes. 🥳",
     "De rien hein, {prenom}. On t'a juste trouvé le seul plat capable de te faire plaisir : {produit_avec_article}. Facile. 💅",
     "Finalement, {prenom}, tout ce temps passé à swiper n'aura pas été vain. Tu repars avec {produit_avec_article}. 🏆",
     "Eh bien {prenom}, {produit_avec_article} a craqué pour ton charme. Ou ta CB. Sûrement ta CB. 😏",
@@ -8529,6 +8533,9 @@ const MATCH_PHRASES = [
     "Arrête de chercher, {prenom}. Ce soir, c'est {produit_avec_article} et demain... on verra 😉 (Je suis fatigué patron)."
 ];
 
+/* ========================================================== */
+/* ========= FIN DU BLOC MODIFIÉ : MATCH_PHRASES ========= */
+/* ========================================================== */
 
 const PROFILE_PUNCHLINES = [
     "En résumé : t'as des goûts ... suspects . Mais au moins t'assumes.",
@@ -8546,6 +8553,33 @@ const PROFILE_PUNCHLINES = [
         { id: "interdits", label: "6/6", text: "Avant que je fasse une boulette...", helper: "Des viandes que tu ne veux pas voir ?", type: "multi" }
     ];
     const ESPECES = [ { name: "Aucune restriction", emoji: "😋" },{ name: "Porc", emoji: "🐷" }, { name: "Cheval", emoji: "🐎" }, { name: "Viande exotique", emoji: "🐊" }, { name: "Gibier", emoji: "🦌" }, { name: "Agneau", emoji: "🐑" }, { name: "Bœuf", emoji: "🐄" }, { name: "Veau", emoji: "🐮" }, { name: "Volaille", emoji: "🐔" } ];
+/* ========================================================== */
+/* ========= DÉBUT DU BLOC À AJOUTER : Fonctions d'Articles ========= */
+/* ========================================================== */
+
+function getArticleForProduit(produitBrut) {
+    if (!produitBrut) return "";
+    const p = produitBrut.trim();
+    const lower = p.toLowerCase();
+    const voyelles = "aàâäeéèêëiïîoôöuùûüyh";
+    if (voyelles.includes(lower[0])) return "l’";
+    const femCandidats = ["aiguillette", "araignée", "bavette", "côte", "cote", "poitrine", "épaule", "selle", "viande"];
+    if (femCandidats.some(f => lower.startsWith(f))) return "la";
+    return "le";
+}
+
+function formatProduitContractionDe(produitBrut) {
+    if (!produitBrut) return "";
+    const article = getArticleForProduit(produitBrut);
+    const p = produitBrut.trim().toLowerCase();
+    if (article === 'le') return `du ${p}`;
+    if (article === 'la') return `de la ${p}`;
+    return `de l’${p}`; // ✅ Gère "l'"
+}
+
+/* ========================================================== */
+/* ========= FIN DU BLOC À AJOUTER : Fonctions d'Articles ========= */
+/* ========================================================== */
     const LOADING_MESSAGES = 
 ["Le gras c'est la vie", 
 "On analyse tes choix de vie", 
@@ -8822,7 +8856,7 @@ function checkForConvergence() {
     }
 
 /* ========================================================== */
-/* ========= DÉBUT DU BLOC À REMPLACER : triggerFinalMatchAnimation ========= */
+/* ========= DÉBUT DU BLOC MODIFIÉ : triggerFinalMatchAnimation ========= */
 /* ========================================================== */
 
 function triggerFinalMatchAnimation(finalCard) {
@@ -8830,7 +8864,7 @@ function triggerFinalMatchAnimation(finalCard) {
     const deck = document.querySelector('.card-deck');
     if (deck) deck.style.pointerEvents = 'none';
 
-    const meatData = finalCard.meatData; // ✅ On garde les données du produit qui a matché
+    const meatData = finalCard.meatData; 
 
     const alreadyExists = state.convergenceMatches.some(match => match.product.Produit === meatData.Produit);
 if (!alreadyExists) {
@@ -8868,6 +8902,7 @@ if (!alreadyExists) {
     const formatData = {
         prenom: state.user.nom ? state.user.nom.charAt(0).toUpperCase() + state.user.nom.slice(1) : "Vous",
         produit_avec_article: formatProduitAvecArticle(meatData.Produit),
+        produit_de: formatProduitContractionDe(meatData.Produit), // ✅ On ajoute la nouvelle donnée pour le placeholder {produit_de}
         e: state.user.genre === 'Madame' ? 'e' : ''
     };
     
@@ -8880,7 +8915,6 @@ if (!alreadyExists) {
 
     const newProfileBtn = viewProfileBtn.cloneNode(true);
     viewProfileBtn.parentNode.replaceChild(newProfileBtn, viewProfileBtn);
-    // ✅ LA CORRECTION EST ICI : On passe 'meatData' en paramètre.
     newProfileBtn.addEventListener('click', () => closeMatchScreen(() => renderProfileScreen(meatData))); 
 
     const newContinueBtn = continueSwipingBtn.cloneNode(true);
@@ -8892,7 +8926,6 @@ if (!alreadyExists) {
 
     matchOverlay.classList.add('is-visible');
 
-    // ... (le reste de la fonction d'animation anime.js reste identique)
     const tl = anime.timeline({
         easing: 'easeOutExpo',
         duration: 800
@@ -8938,8 +8971,9 @@ if (!alreadyExists) {
 }
 
 /* ========================================================== */
-/* ========= FIN DU BLOC À REMPLACER : triggerFinalMatchAnimation ========= */
+/* ========= FIN DU BLOC MODIFIÉ : triggerFinalMatchAnimation ========= */
 /* ========================================================== */
+
 
 /* ========================================================== */
 /* ========= DÉBUT DU BLOC MODIFIÉ : refreshDeck ========= */
