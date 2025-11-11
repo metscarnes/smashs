@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🥩 SMASHS - Ta Rencontre Charnelle</title>
+    <title> SMASHS - Ta Rencontre Charnelle</title>
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/metscarnes/bimi-metscarnes/main/Logo%20Mets%20Carn%C3%A9s%20HD.png">
     <link href="https://db.onlinewebfonts.com/c/194ce65461099b38279d03e32740d78e?family=Loyola+Pro+Bold" rel="stylesheet" type="text/css"/>
     <link href="https://fonts.googleapis.com/css2?family=Playpen+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -467,7 +467,7 @@
   transition: max-height 0.36s ease, padding 0.3s ease;
 }
 .card .card-info .card-name {
-  font-size: 1.49rem; // ✅
+  font-size: 1.2rem; // ✅
   font-weight: 700;
   display: block;
   white-space: normal; /* ✅ C'EST LA CORRECTION CLÉ : autorise le retour à la ligne */
@@ -9166,7 +9166,7 @@ if (state.profile.Gout > 7.5 && state.profile.Tendrete < 5) {
     }
 
 /* ========================================================== */
-/* ========= DÉBUT DU BLOC REMPLACÉ : function createCard ========= */
+/* ========= DÉBUT DU BLOC MODIFIÉ : function createCard ========= */
 /* ========================================================== */
 
 function createCard(m, deckElement) {
@@ -9181,7 +9181,6 @@ function createCard(m, deckElement) {
   c.dataset.produit = m.Produit;
   c.meatData = m;
 
-  // ✅ Structure HTML mise à jour : media area (fixed height) + info block
   c.innerHTML = `
     <div class="card-choice like">Match</div>
     <div class="card-choice nope">Next</div>
@@ -9194,7 +9193,7 @@ function createCard(m, deckElement) {
         <div class="card-text-wrapper">
           <div class="card-name">${m.Produit}</div>
           <div class="card-location"><span>🏠</span> Vit ici : ${state.user.city || 'Neuilly-Plaisance'}</div>
-          ${m.bio_template ? `<p class="card-bio">${parseBioTemplate(m.bio_template, state.user)}</p>` : ''}
+          
         </div>
         <svg class="card-expand-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke: rgba(245,241,232,0.85);">
           <polyline points="6 9 12 15 18 9"></polyline>
@@ -9204,7 +9203,7 @@ function createCard(m, deckElement) {
     Ton rendez-vous est ici ↗
     </a>
     </div>
-  `;
+  `; // ✅ La ligne contenant le <p class="card-bio"> a été supprimée ici.
     
     const infoContent = c.querySelector('.card-info-content');
     const externalLink = c.querySelector('.card-external-link');
@@ -9212,7 +9211,6 @@ function createCard(m, deckElement) {
     if (infoContent) {
         infoContent.addEventListener('click', (e) => {
             e.stopPropagation();
-            // ✅ NOUVEAU : Ouvrir le modal au lieu d'expand
             showProductModal(m);
         });
     }
@@ -9221,7 +9219,6 @@ function createCard(m, deckElement) {
     externalLink.addEventListener('click', (e) => {
       e.stopPropagation();
       e.preventDefault();
-      // Open product modal in-app instead of navigating away / opening new tab
       try { showModal(m); } catch (err) { window.location.href = m.product_url || '#'; }
     });
   }
@@ -9232,7 +9229,7 @@ function createCard(m, deckElement) {
 }
 
 /* ========================================================== */
-/* ========= FIN DU BLOC REMPLACÉ : function createCard ========= */
+/* ========= FIN DU BLOC MODIFIÉ : function createCard ========= */
 /* ========================================================== */
 
     function createThermoBars(m) {
