@@ -334,8 +334,24 @@
         #loading-screen .loading-phase-2 { opacity: 0; transform: translateY(20px); pointer-events: none; }
         #loading-screen.is-finished .loading-phase-1 { opacity: 0; transform: scale(0.95); pointer-events: none; }
         #loading-screen.is-finished .loading-phase-2 { opacity: 1; transform: translateY(0); pointer-events: auto; }
-        .loading-text { font-size: clamp(1.2rem, 4vw, 1.8rem); margin-bottom: 2rem; letter-spacing: 1px; text-transform: uppercase; text-shadow: 0 2px 15px var(--glow); animation: textFadeInOut 1.5s ease-in-out infinite; }
-        @keyframes textFadeInOut { 0%, 100% { opacity: 0; transform: translateY(10px); } 15%, 85% { opacity: 1; transform: translateY(0); } }
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+/* =-=-=-=-=-= DÉBUT DU BLOC CORRIGÉ : Animation du chargement =-=-=-=-=-= */
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+
+.loading-text {
+    font-size: clamp(1.2rem, 4vw, 1.8rem);
+    margin-bottom: 2rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-shadow: 0 2px 15px var(--glow);
+    /* animation: textFadeInOut 1.5s ease-in-out infinite; */ /* ✅ Ligne supprimée pour laisser le JavaScript gérer l'animation séquentielle. */
+}
+
+/* L'animation @keyframes textFadeInOut a été entièrement supprimée car elle n'est plus nécessaire. */
+
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+/* =-=-=-=-=-=- FIN DU BLOC CORRIGÉ : Animation du chargement =-=-=-=-=-=- */
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
         .loading-bar-container { width: 100%; max-width: 300px; height: 4px; background: rgba(237, 193, 150, 0.2); overflow: hidden; margin: 0 auto; }
         .loading-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent) 0%, var(--primary) 100%); box-shadow: 0 0 20px var(--glow); }
         .reveal-button { font-size: 1.2rem; letter-spacing: 2px; text-transform: uppercase; color: var(--primary); background: transparent; border: 2px solid var(--accent); padding: 1.2rem 3rem; cursor: pointer; transition: all 0.4s ease; font-family: 'Loyola Pro Bold', serif; }
@@ -8422,86 +8438,73 @@ function renderSwipe() {
 /* ========= FIN DU BLOC MODIFIÉ : renderSwipe ========= */
 /* ========================================================== */
 
-/* ========================================================== */
-/* ========= DÉBUT DU BLOC MODIFIÉ : transitionToLoading (Avec Animations JS) ========= */
-/* ========================================================== */
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+/* =-=-=-=-=-= DÉBUT BLOC MODIFIÉ : transitionToLoading (avec Timeline) =-=-=-=-=-= */
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
 
 function transitionToLoading() {
     showView('loading');
     const loadingTextEl = document.querySelector('.loading-text');
-    const totalDuration = LOADING_MESSAGES.length * 1500; // ✅ Durée totale calculée dynamiquement
-    let messageIndex = 0;
-    let intervalId;
-
-    DOM.loadingBar.style.transition = 'none';
-    DOM.loadingBar.style.width = '0%';
-    void DOM.loadingBar.offsetWidth;
     
-    anime({
+    // --- Configuration de l'animation ---
+    const PHRASE_DURATION = 1500; // ✅ Chaque phrase est visible pendant 1.5s
+    const FADE_DURATION = 400;   // ✅ Durée du fondu en entrée/sortie
+    const totalDuration = LOADING_MESSAGES.length * PHRASE_DURATION;
+
+    // On s'assure que le texte est invisible au départ
+    loadingTextEl.style.opacity = 0;
+
+    // --- Création de la Timeline principale ---
+    const tl = anime.timeline({
+        duration: totalDuration,
+        easing: 'linear',
+        // À la toute fin de la timeline, on passe à l'écran de swipe
+        complete: () => {
+            DOM.views.loading.classList.add('is-opening');
+            setTimeout(() => {
+                showView('app');
+                showAppScreen('swipe');
+                renderSwipe();
+                DOM.views.loading.classList.remove('is-opening');
+            }, 1000);
+        }
+    });
+
+    // --- Animation de la barre de chargement ---
+    tl.add({
         targets: DOM.loadingBar,
         width: '100%',
-        duration: totalDuration, // ✅ La barre se synchronise sur la durée totale des messages
-        easing: 'linear'
-    });
+    }, 0); // Commence au tout début (offset 0)
 
-    const changeMessage = () => {
-        // Étape 1: Animer la sortie du texte actuel
-        anime({
+    // --- Animation séquentielle des phrases ---
+    LOADING_MESSAGES.forEach((message, index) => {
+        const startTime = index * PHRASE_DURATION;
+
+        tl.add({
             targets: loadingTextEl,
-            opacity: 0,
-            translateY: -10, // ✅ Le texte monte pour sortir
-            duration: 400,
-            easing: 'easeInQuad',
-            complete: () => {
-                messageIndex++; // On passe au message suivant
-                if (messageIndex >= LOADING_MESSAGES.length) {
-                    clearInterval(intervalId); // On arrête si on a affiché tous les messages
-                    return;
-                }
-                
-                // Étape 2: Changer le texte quand il est invisible
-                loadingTextEl.textContent = LOADING_MESSAGES[messageIndex];
-
-                // Étape 3: Animer l'entrée du nouveau texte
-                anime({
-                    targets: loadingTextEl,
-                    opacity: 1,
-                    translateY: 0, // ✅ Le texte revient à sa position
-                    duration: 400,
-                    easing: 'easeOutQuad'
-                });
+            opacity: [0, 1],
+            translateY: [10, 0],
+            duration: FADE_DURATION,
+            easing: 'easeOutQuad',
+            // Juste avant que l'animation commence, on met à jour le texte
+            begin: () => {
+                loadingTextEl.textContent = message;
             }
-        });
-    };
+        }, startTime); // Chaque animation de fondu en entrée commence à son propre top départ
 
-    // Initialisation : Affiche le premier message avec une animation d'entrée
-    loadingTextEl.textContent = LOADING_MESSAGES[0];
-    anime({
-        targets: loadingTextEl,
-        opacity: [0, 1],
-        translateY: [10, 0], // ✅ Le premier texte vient d'en bas
-        duration: 500
+        tl.add({
+            targets: loadingTextEl,
+            opacity: [1, 0],
+            translateY: [0, -10],
+            duration: FADE_DURATION,
+            easing: 'easeInQuad',
+        }, startTime + PHRASE_DURATION - FADE_DURATION); // Le fondu de sortie commence juste avant la fin de la durée de la phrase
     });
-
-    // Lance le cycle de changement après que le premier message ait eu le temps de s'afficher
-    intervalId = setInterval(changeMessage, 1500); // ✅ Change de message toutes les 1.5 secondes
-
-    // Transition finale vers l'application
-    setTimeout(() => {
-        clearInterval(intervalId); // Sécurité pour arrêter l'intervalle
-        DOM.views.loading.classList.add('is-opening');
-        setTimeout(() => {
-            showView('app');
-            showAppScreen('swipe');
-            renderSwipe();
-            DOM.views.loading.classList.remove('is-opening');
-        }, 1000);
-    }, totalDuration); // ✅ On attend que tous les messages soient passés
 }
 
-/* ========================================================== */
-/* ========= FIN DU BLOC MODIFIÉ : transitionToLoading (Avec Animations JS) ========= */
-/* ========================================================== */
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+/* =-=-=-=-=-=- FIN BLOC MODIFIÉ : transitionToLoading (avec Timeline) =-=-=-=-=-=- */
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
 
 
     const NUTRITIONAL_INFO_MAP = [ { key: 'Energie', label: 'Énergie', unit: 'kcal' }, { key: 'Proteines', label: 'Protéines', unit: 'g' }, { key: 'Lipides', label: 'Lipides', unit: 'g' }, { key: 'Glucides', label: 'Glucides', unit: 'g' }, { key: 'Sel', label: 'Sel', unit: 'g' }, { key: 'Fer', label: 'Fer', unit: 'mg' }, { key: 'Zinc', label: 'Zinc', unit: 'mg' }, { key: 'Selenium', label: 'Sélénium', unit: 'µg' }, { key: 'VitamineB12',label: 'Vitamine B12', unit: 'µg' } ];
