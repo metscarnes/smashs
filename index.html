@@ -9215,9 +9215,9 @@ function renderQuestionStep() {
 /* ========= DÉBUT DU BLOC À REMPLACER : renderProfileScreen ========= */
 /* ========================================================== */
 
-/* ========================================================== */
-/* ========= DÉBUT DU BLOC MODIFIÉ : renderProfileScreen ========= */
-/* ========================================================== */
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+/* =-=-=-=-=-= DÉBUT BLOC MODIFIÉ : renderProfileScreen (Lien même page) =-=-=-=-=-= */
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
 
 function renderProfileScreen(triggeringMatchProduct) {
     if (!DOM.appScreens.profile) {
@@ -9267,9 +9267,8 @@ if (state.profile.Gout > 7.5 && state.profile.Tendrete < 5) {
     const logoUrl = "https://raw.githubusercontent.com/metscarnes/bimi-metscarnes/main/Logo%20Mets%20Carn%C3%A9s%20HD.png";
     const meatImageUrl = bestMatch ? bestMatch.image_url : "https://via.placeholder.com/150/1a1614/d4b896?text=🥩";
 
-  // ✅ Le bouton est maintenant un vrai lien qui pointe vers la page Odoo.
   const ctaHtml = bestMatch ? 
-    `<a href="${bestMatch.product_url || '#'}" target="_blank" class="btn-cta-profile">Ton rendez vous est par ici</a>` :
+    `<a href="${bestMatch.product_url || '#'}" class="btn-cta-profile">Ton rendez vous est par ici</a>` : // ✅ L'attribut target="_blank" a été supprimé ici.
     ``;
 
   DOM.appScreens.profile.innerHTML = `
@@ -9305,15 +9304,15 @@ if (state.profile.Gout > 7.5 && state.profile.Tendrete < 5) {
         showAppScreen('swipe');
         renderSwipe();
     });
-
-  // ✅ Le bloc de code qui gérait le clic pour le pop-up a été entièrement supprimé. Le lien fonctionne maintenant tout seul.
     
     showAppScreen('profile');
 }
 
-/* ========================================================== */
-/* ========= FIN DU BLOC MODIFIÉ : renderProfileScreen ========= */
-/* ========================================================== */
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+/* =-=-=-=-=-=- FIN BLOC MODIFIÉ : renderProfileScreen (Lien même page) =-=-=-=-=-=- */
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+
+
     function parseBioTemplate(template, user) {
         if (!template || !user) return "";
         const userGenre = (user.genre || "").toLowerCase();
@@ -9737,9 +9736,9 @@ async function handleBackStep() { // ✅ La fonction est maintenant asynchrone p
 /* ========= FIN DU BLOC À REMPLACER : handleBackStep ========= */
 /* ========================================================== */
 
-/* ========================================================== */
-/* ========= DÉBUT DU BLOC MODIFIÉ : renderResultsScreen ========= */
-/* ========================================================== */
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+/* =-=-=-=-=-= DÉBUT BLOC MODIFIÉ : renderResultsScreen (Lien même page) =-=-=-=-=-= */
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
 
 function renderResultsScreen() {
     const resultsContainer = DOM.appScreens.results;
@@ -9760,10 +9759,10 @@ function renderResultsScreen() {
                     <div class="match-gallery-info">
                         <h3>${product.Produit}</h3>
                         <p class="match-compatibility">🏆 Profil idéal validé à ${compatibility}%</p>
-            <a href="${product.product_url || '#'}" target="_blank" class="btn-view-product">Ton date est ici</a>
+            <a href="${product.product_url || '#'}" class="btn-view-product">Ton date est ici</a>
                     </div>
                 </li>
-            `; // ✅ Le texte et le lien (href) ont été modifiés ici. target="_blank" ouvre un nouvel onglet.
+            `; // ✅ L'attribut target="_blank" a été supprimé du lien ici.
         }).join('');
 
         content = `
@@ -9798,14 +9797,12 @@ function renderResultsScreen() {
         renderSwipe();
     });
 
-  // ✅ Le bloc de code qui gérait le clic pour le pop-up a été entièrement supprimé. Le lien fonctionne maintenant tout seul.
-
     showAppScreen('results');
 }
 
-/* ========================================================== */
-/* ========= FIN DU BLOC MODIFIÉ : renderResultsScreen ========= */
-/* ========================================================== */
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+/* =-=-=-=-=-=- FIN BLOC MODIFIÉ : renderResultsScreen (Lien même page) =-=-=-=-=-=- */
+/* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
 function bindGlobalEvents() {
     DOM.buttons.start.addEventListener('click', transitionToApp);
 
