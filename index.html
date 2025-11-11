@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🥩 SMASHS - Ta Rencontre Charnelle</title>
+    <title> SMASHS - Ta Rencontre Charnelle</title>
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/metscarnes/bimi-metscarnes/main/Logo%20Mets%20Carn%C3%A9s%20HD.png">
     <link href="https://db.onlinewebfonts.com/c/194ce65461099b38279d03e32740d78e?family=Loyola+Pro+Bold" rel="stylesheet" type="text/css"/>
     <link href="https://fonts.googleapis.com/css2?family=Playpen+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -1170,6 +1170,10 @@
     flex-shrink: 0;
 }
 
+/* ========================================================== */
+/* ========= DÉBUT DU BLOC MODIFIÉ : Superposition des images (Résultats) ========= */
+/* ========================================================== */
+
 .match-gallery-pfps .user-pfp,
 .match-gallery-pfps .product-pfp {
     width: 80px;
@@ -1185,12 +1189,17 @@
 
 .match-gallery-pfps .user-pfp {
     left: 0;
-    z-index: 2; /* Passe au-dessus de l'autre */
+    z-index: 1; /* ✅ Le logo passe en arrière-plan */
 }
 
 .match-gallery-pfps .product-pfp {
     left: 40px; /* Décale pour créer le chevauchement */
+    z-index: 2; /* ✅ L'image du produit passe au premier plan */
 }
+
+/* ========================================================== */
+/* ========= FIN DU BLOC MODIFIÉ : Superposition des images (Résultats) ========= */
+/* ========================================================== */
 
 .match-gallery-info {
     flex-grow: 1;
