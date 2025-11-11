@@ -20,7 +20,7 @@
         body { font-family: 'Playpen Sans', sans-serif; color: var(--text-light); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
         body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: -1; opacity: 0.6; }
         h1, h2, h3, h4, .btn { font-family: 'Loyola Pro Bold', serif; color: var(--primary); }
-        .view-container { position: fixed; inset: 0; opacity: 0; pointer-events: none; transform: scale(1.05); transition: opacity var(--transition-speed-medium) ease, transform var(--transition-speed-medium) ease; display: flex; justify-content: center; align-items: center; padding: 1rem; overflow-y: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
+        .view-container { position: fixed; inset: 0; opacity: 0; pointer-events: none; transform: scale(1.05); transition: opacity var(--transition-speed-medium) ease, transform var(--transition-speed-medium) ease; display: flex; justify-content: center; align-items: center; padding: 1rem; overflow-y: auto; }
         .view-container.is-visible { opacity: 1; pointer-events: auto; transform: scale(1); }
         .btn { background: var(--accent); color: var(--dark); border: none; padding: 1.2rem 3rem; font-size: 1.1rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 8px 30px rgba(204, 137, 86, 0.3); letter-spacing: 1px; text-transform: uppercase; }
         .btn:hover { background: var(--primary); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(237, 193, 150, 0.4); }
@@ -38,7 +38,7 @@
         .btn-welcome::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent); transition: left 0.6s; }
         .btn-welcome:hover::before { left: 100%; }
         .btn-welcome:hover { background: var(--primary); transform: translateY(-4px); box-shadow: 0 15px 50px rgba(237, 193, 150, 0.6); }
-        #app { z-index: 50; touch-action: pan-y; }
+        #app { z-index: 50; }
         .container { width: 100%; max-width: 1200px; margin: auto; background: linear-gradient(135deg, var(--dark-secondary) 0%, rgba(4, 5, 8, 0.95) 100%); box-shadow: 0 40px 120px rgba(0, 0, 0, 0.8), 0 0 1px 1px var(--border-subtle); padding: 2rem 4rem; border: 1px solid var(--border-subtle); position: relative; opacity: 0; transform: translateY(20px); transition: opacity var(--transition-speed-medium) var(--transition-easing), transform var(--transition-speed-medium) var(--transition-easing); }
         #app.is-visible .container { opacity: 1; transform: translateY(0); }
         .container::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); opacity: 0.5; }
@@ -114,7 +114,6 @@
   top: 0;
   left: 0;
   width: 100%;
-  max-width: 100%; /* ✅ Empêche tout élargissement horizontal */
   height: 100%;
   background-color: #1a1614;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
@@ -125,13 +124,12 @@
   pointer-events: none;
   user-select: none;
   border-radius: 20px;
-  overflow: hidden; /* ✅ Cache les débordements mais simplifié */
-  touch-action: manipulation; /* ✅ Optimise les interactions tactiles */
+  overflow: visible; /* allow info area to grow outside when expanded */
+  touch-action: pan-y;
   will-change: transform;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  box-sizing: border-box; /* ✅ Inclut les bordures dans la largeur */
 }
         .card:hover { transform: scale(1.02); box-shadow: 0 15px 50px rgba(0,0,0,0.5); }
         .card.is-next { opacity: 0.5; transform: scale(0.95); }
@@ -185,8 +183,6 @@
   overflow: hidden; /* hide overflow when collapsed */
   transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   background: linear-gradient(180deg, rgba(26,22,20,0) 0%, rgba(26,22,20,0) 60%); /* neutral background so text is readable */
-  width: 100%; /* ✅ Empêche l'élargissement horizontal */
-  box-sizing: border-box; /* ✅ Inclut le padding dans la largeur */
 }
 .card.is-expanded .card-info {
   max-height: 1000px; /* allow to expand to full content */
@@ -216,8 +212,6 @@
     display: flex;
     align-items: flex-start;
     gap: 0.5rem;
-    width: 100%; /* ✅ Empêche l'élargissement */
-    min-width: 0; /* ✅ Permet la contraction du contenu */
 }
 
 .card-text-wrapper {
@@ -231,13 +225,6 @@
     margin: 0;
     text-shadow: 0 2px 8px rgba(0,0,0,0.5);
     letter-spacing: -0.5px;
-    white-space: normal !important; /* ✅ CRITIQUE : Permet le retour à la ligne */
-    word-wrap: break-word !important; /* ✅ Force le retour à la ligne */
-    overflow-wrap: break-word !important; /* ✅ Compatibilité moderne */
-    word-break: break-word !important; /* ✅ Casse les mots longs si nécessaire */
-    max-width: 100% !important; /* ✅ Ne dépasse jamais la largeur du conteneur */
-    hyphens: auto; /* ✅ Ajoute des traits d'union si possible */
-    display: block; /* ✅ Force le comportement de bloc */
 }
 
 .card-location {
@@ -1543,6 +1530,7 @@ const DOM = {
         feedbackToast: document.getElementById('feedback-toast'),
     };
 
+// ✅ CORRECTION : 227 avec url
 // ✅ CORRECTION : 227 avec url
     const ALL_PRODUCTS = [
   {
@@ -9792,51 +9780,39 @@ function handleUndoSwipe() {
     function initCardHammer(c) {
         if (c.hammerInitialized) return;
         c.hammerInitialized = true;
+    // touchAction 'none' empêche le navigateur d'interpréter les gestes
+    // (évite que le scroll vertical bloque / fasse 'sauter' la carte)
+    const h = new Hammer(c, {
+      touchAction: 'none'
+    });
+    // threshold réduit les faux positifs (petits mouvements)
+    h.get('pan').set({ direction: Hammer.DIRECTION_HORIZONTAL, threshold: 10 }); // ✅ Force le pan horizontal uniquement
 
-        // ✅ touchAction: 'pan-y' permet le scroll vertical tout en capturant le swipe horizontal
-        const h = new Hammer(c, {
-            touchAction: 'pan-y'
-        });
-
-        // ✅ Force le pan horizontal uniquement avec un seuil pour éviter les faux positifs
-        h.get('pan').set({
-            direction: Hammer.DIRECTION_HORIZONTAL,
-            threshold: 10
-        });
-
-        h.on('panstart', e => {
-            c.isPanning = true;
-            c.dataset.panning = '1';
-        });
-
-        h.on('pan', e => handlePan(e, c));
-
-        h.on('panend', e => {
-            c.isPanning = false;
-            delete c.dataset.panning;
-            handlePanEnd(e, c);
-        });
-
-        // ✅ Gérer aussi pancancel pour les cas où le geste est interrompu
-        h.on('pancancel', e => {
-            c.isPanning = false;
-            delete c.dataset.panning;
-            // Réinitialiser la position de la carte
-            c.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-            c.style.transform = '';
-            const likeEl = c.querySelector('.like');
-            const nopeEl = c.querySelector('.nope');
-            if (likeEl) likeEl.style.opacity = 0;
-            if (nopeEl) nopeEl.style.opacity = 0;
-        });
+    h.on('panstart', e => {
+      c.isPanning = true;
+      c.dataset.panning = '1';
+      // Prevent native touch scrolling while interacting with the card
+      // We attach a non-passive touchmove listener so we can call preventDefault
+      const prevent = function(ev) { ev.preventDefault(); };
+      c._preventTouchMove = prevent;
+      document.addEventListener('touchmove', prevent, { passive: false });
+    });
+    h.on('pan', e => handlePan(e, c));
+    h.on('panend', e => {
+      c.isPanning = false;
+      delete c.dataset.panning;
+      // remove the temporary touchmove blocker
+      if (c._preventTouchMove) {
+        try { document.removeEventListener('touchmove', c._preventTouchMove, { passive: false }); } catch (err) { document.removeEventListener('touchmove', c._preventTouchMove); }
+        delete c._preventTouchMove;
+      }
+      handlePanEnd(e, c);
+    });
     }
   function handlePan(e, c) {
     // Defensive guards: if an animation is playing or this card is already
     // processed, ignore pan updates to avoid race conditions.
     if (state.isAnimating || c.dataset.processed) return;
-
-    // ✅ Protection supplémentaire : Si la carte n'est pas active, on ne fait rien
-    if (!c.classList.contains('is-active')) return;
 
     // ✅ FIX CRITIQUE : On supprime complètement deltaY pour éviter le saut sur mobile
     c.style.transition = 'none';
