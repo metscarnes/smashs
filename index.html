@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> SMASHS - Ta Rencontre Charnelle</title>
+    <title>🥩 SMASHS - Ta Rencontre Charnelle</title>
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/metscarnes/bimi-metscarnes/main/Logo%20Mets%20Carn%C3%A9s%20HD.png">
     <link href="https://db.onlinewebfonts.com/c/194ce65461099b38279d03e32740d78e?family=Loyola+Pro+Bold" rel="stylesheet" type="text/css"/>
     <link href="https://fonts.googleapis.com/css2?family=Playpen+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -1346,6 +1346,42 @@
 /* ========= FIN DU BLOC À AJOUTER : Bouton "Voir Mon Profil" (Résultats) ========= */
 /* ========================================================== */
 
+/* ========================================================== */
+/* ========= DÉBUT DU BLOC À AJOUTER : Style du Pop-up Produit ========= */
+/* ========================================================== */
+
+#product-modal-overlay .modal-close-btn {
+    position: absolute; /* ✅ Positionnement flottant */
+    top: 1rem; /* ✅ En haut */
+    right: 1rem; /* ✅ À droite */
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10; /* ✅ S'assure qu'il est au-dessus du contenu */
+}
+#product-modal-overlay .modal-close-btn:hover {
+    color: var(--primary);
+    transform: rotate(90deg);
+}
+
+/* On s'assure que le contenu du modal est bien centré */
+#product-modal-overlay .product-modal-content {
+    text-align: center;
+}
+
+/* On centre le titre du produit */
+#product-modal-overlay .product-modal-title {
+    margin-top: 1.5rem;
+}
+
+/* ========================================================== */
+/* ========= FIN DU BLOC À AJOUTER : Style du Pop-up Produit ========= */
+/* ========================================================== */
+
+
     </style>
 </head>
 <body>
@@ -1453,6 +1489,7 @@
     </div>
   </div>
 </div>
+
 
 <!-- ✅ MODAL D'ALERTE GLOBAL -->
 <div class="modal-overlay" id="alert-modal">
@@ -9028,6 +9065,10 @@ function renderQuestionStep() {
 /* ========= DÉBUT DU BLOC À REMPLACER : renderProfileScreen ========= */
 /* ========================================================== */
 
+/* ========================================================== */
+/* ========= DÉBUT DU BLOC MODIFIÉ : renderProfileScreen ========= */
+/* ========================================================== */
+
 function renderProfileScreen(triggeringMatchProduct) {
     if (!DOM.appScreens.profile) {
         const profileScreenEl = document.createElement('div');
@@ -9073,23 +9114,21 @@ if (state.profile.Gout > 7.5 && state.profile.Tendrete < 5) {
         bestMatch = allScores[0]?.p;
     }
     
-    // ✅ On prépare les URLs pour le visuel
     const logoUrl = "https://raw.githubusercontent.com/metscarnes/bimi-metscarnes/main/Logo%20Mets%20Carn%C3%A9s%20HD.png";
     const meatImageUrl = bestMatch ? bestMatch.image_url : "https://via.placeholder.com/150/1a1614/d4b896?text=🥩";
 
+  // ✅ Le bouton est maintenant un vrai lien qui pointe vers la page Odoo.
   const ctaHtml = bestMatch ? 
-    `<a href="#" class="btn-cta-profile" data-produit="${encodeURIComponent(bestMatch.Produit)}">Découvrez ${formatProduitAvecArticle(bestMatch.Produit)}</a>` :
+    `<a href="${bestMatch.product_url || '#'}" target="_blank" class="btn-cta-profile">Ton rendez vous est par ici</a>` :
     ``;
 
   DOM.appScreens.profile.innerHTML = `
     <div class="profile-container">
             
-            <!-- ✅ DÉBUT DU BLOC AJOUTÉ -->
             <div class="profile-match-visual profile-reveal-item" style="--delay: 0.2s;">
                 <div class="profile-match-logo" style="background-image: url('${logoUrl}')"></div>
                 <div class="profile-match-meat" style="background-image: url('${meatImageUrl}')"></div>
             </div>
-            <!-- ✅ FIN DU BLOC AJOUTÉ -->
 
             <h1 class="profile-reveal-item" style="--delay: 0.4s; margin-top: 2rem;">Ton Profil Carnivore</h1>
             
@@ -9116,22 +9155,15 @@ if (state.profile.Gout > 7.5 && state.profile.Tendrete < 5) {
         showAppScreen('swipe');
         renderSwipe();
     });
-  // CTA produit : ouvrir modal plutôt que nouvelle page
-  const cta = DOM.appScreens.profile.querySelector('.btn-cta-profile');
-  if (cta) {
-    cta.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      try { showModal(bestMatch); } catch (err) { window.location.href = bestMatch.product_url || '#'; }
-    });
-  }
+
+  // ✅ Le bloc de code qui gérait le clic pour le pop-up a été entièrement supprimé. Le lien fonctionne maintenant tout seul.
     
     showAppScreen('profile');
 }
-/* ========================================================== */
-/* ========= FIN DU BLOC À REMPLACER : renderProfileScreen ========= */
-/* ========================================================== */
 
+/* ========================================================== */
+/* ========= FIN DU BLOC MODIFIÉ : renderProfileScreen ========= */
+/* ========================================================== */
     function parseBioTemplate(template, user) {
         if (!template || !user) return "";
         const userGenre = (user.genre || "").toLowerCase();
@@ -9395,34 +9427,28 @@ function generateConvergenceHint() {
 /* ========= FIN DU BLOC CORRIGÉ : generateConvergenceHint ========= */
 /* ========================================================== */
 /* ========================================================== */
-/* ========= FONCTION POUR AFFICHER LE MODAL PRODUIT ========= */
+/* ========= DÉBUT DU BLOC MODIFIÉ : showProductModal ========= */
 /* ========================================================== */
 
 function showProductModal(product) {
     const modal = document.getElementById('product-modal-overlay');
-    const title = document.getElementById('product-modal-title');
-    const category = document.getElementById('product-modal-category');
-    const body = document.getElementById('product-modal-body');
-    const cta = document.getElementById('product-modal-cta');
-    const closeBtn = document.getElementById('product-modal-close');
+    const contentContainer = modal.querySelector('.product-modal-content'); // ✅ On cible le conteneur principal
+    if (!contentContainer) return;
 
-    // Titre et catégorie
-    title.textContent = product.Nom || 'Produit';
-    category.textContent = product.Categorie || '';
+    // ✅ On prépare les URLs pour le visuel
+    const logoUrl = "https://raw.githubusercontent.com/metscarnes/bimi-metscarnes/main/Logo%20Mets%20Carn%C3%A9s%20HD.png";
+    const meatImageUrl = product.image_url || "https://via.placeholder.com/150/1a1614/d4b896?text=🥩";
 
     // Construction du contenu
     let bodyHTML = '';
-
-    // ✅ AFFICHER BIO_TEMPLATE AU LIEU DE DESCRIPTION
     if (product.bio_template) {
         const bioText = parseBioTemplate(product.bio_template, state.user);
         bodyHTML += `<p style="font-style: italic; line-height: 1.8; margin-bottom: 1.5rem;">${bioText}</p>`;
     }
 
-    // Valeurs nutritionnelles
     if (product.Energie || product.Proteines || product.Lipides) {
-        bodyHTML += '<h3 style="color: var(--primary); margin-top: 1.5rem; margin-bottom: 0.75rem;">Valeurs nutritionnelles (pour 100g)</h3>';
-        bodyHTML += '<ul style="list-style: none; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">';
+        bodyHTML += '<h3 style="color: var(--primary); margin-top: 1.5rem; margin-bottom: 0.75rem; font-family: \'Loyola Pro Bold\', serif;">Valeurs nutritionnelles (pour 100g)</h3>';
+        bodyHTML += '<ul style="list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.5rem 1rem; text-align: left;">';
         if (product.Energie) bodyHTML += `<li>⚡ Énergie: ${product.Energie} kcal</li>`;
         if (product.Proteines) bodyHTML += `<li>💪 Protéines: ${product.Proteines}g</li>`;
         if (product.Lipides) bodyHTML += `<li>🥑 Lipides: ${product.Lipides}g</li>`;
@@ -9432,35 +9458,56 @@ function showProductModal(product) {
         bodyHTML += '</ul>';
     }
 
-    // Interdits alimentaires
     if (product.Interdits && product.Interdits !== 'Aucun') {
         bodyHTML += `<p style="margin-top: 1rem; color: var(--danger);"><strong>⚠️ Interdits:</strong> ${product.Interdits}</p>`;
     }
 
-    body.innerHTML = bodyHTML;
+    // ✅ On reconstruit TOUT le contenu du modal avec la nouvelle structure
+    contentContainer.innerHTML = `
+        <button class="modal-close-btn" id="product-modal-close">✕</button>
 
-    // Configuration du CTA (✅ PAS DE target="_blank")
+        <!-- ✅ Visuel (logo + produit) ajouté, copié de l'écran de profil -->
+        <div class="profile-match-visual" style="margin: 0 auto 0;">
+            <div class="profile-match-logo" style="background-image: url('${logoUrl}')"></div>
+            <div class="profile-match-meat" style="background-image: url('${meatImageUrl}')"></div>
+        </div>
+
+        <div class="product-modal-header">
+            <!-- ✅ Titre et catégorie mis à jour -->
+            <h2 class="product-modal-title" id="product-modal-title">${product.Produit}</h2>
+            <p class="product-modal-category" id="product-modal-category">${product.Categorie || ''}</p>
+        </div>
+        <div class="product-modal-body" id="product-modal-body">
+            ${bodyHTML}
+        </div>
+        <div class="product-modal-footer">
+            <a href="#" class="btn btn-primary product-modal-cta" id="product-modal-cta">
+                Votre date t'attend ici 💕
+            </a>
+        </div>
+    `;
+
+    const cta = contentContainer.querySelector('#product-modal-cta');
+    const closeBtn = contentContainer.querySelector('#product-modal-close');
+
     if (product.product_url) {
         cta.href = product.product_url;
-        cta.style.display = 'block';
+        cta.style.display = 'inline-block';
     } else {
         cta.style.display = 'none';
     }
 
-    // Gestion de la fermeture
     closeBtn.onclick = () => modal.classList.remove('is-visible');
     modal.onclick = (e) => {
         if (e.target === modal) modal.classList.remove('is-visible');
     };
 
-    // Afficher le modal
     modal.classList.add('is-visible');
 }
 
 /* ========================================================== */
-/* ========= DÉBUT DU BLOC À REMPLACER : showCustomAlert ========= */
+/* ========= FIN DU BLOC MODIFIÉ : showProductModal ========= */
 /* ========================================================== */
-
 function showCustomAlert({ title, text, confirmText = 'Compris', cancelText = null }) { // ✅ Accepte un bouton d'annulation optionnel
     return new Promise(resolve => {
         const modalTitle = document.getElementById('alert-modal-title');
@@ -9539,8 +9586,9 @@ async function handleBackStep() { // ✅ La fonction est maintenant asynchrone p
 /* ========================================================== */
 /* ========= FIN DU BLOC À REMPLACER : handleBackStep ========= */
 /* ========================================================== */
+
 /* ========================================================== */
-/* ========= DÉBUT DU BLOC À REMPLACER : renderResultsScreen ========= */
+/* ========= DÉBUT DU BLOC MODIFIÉ : renderResultsScreen ========= */
 /* ========================================================== */
 
 function renderResultsScreen() {
@@ -9562,10 +9610,10 @@ function renderResultsScreen() {
                     <div class="match-gallery-info">
                         <h3>${product.Produit}</h3>
                         <p class="match-compatibility">🏆 Profil idéal validé à ${compatibility}%</p>
-            <a href="#" class="btn-view-product" data-index="${index}">Ton date t'attend ! ➔</a>
+            <a href="${product.product_url || '#'}" target="_blank" class="btn-view-product">Ton date est ici</a>
                     </div>
                 </li>
-            `;
+            `; // ✅ Le texte et le lien (href) ont été modifiés ici. target="_blank" ouvre un nouvel onglet.
         }).join('');
 
         content = `
@@ -9591,36 +9639,24 @@ function renderResultsScreen() {
         </div>
     `;
 
-  // ✅ LOGIQUE DU NOUVEAU BOUTON AJOUTÉE ICI
     resultsContainer.querySelector('#view-profile-from-results-btn').addEventListener('click', () => {
-        renderProfileScreen(); // Appelle l'écran de profil
+        renderProfileScreen();
     });
 
     resultsContainer.querySelector('#continue-swiping-from-results').addEventListener('click', () => {
         showAppScreen('swipe');
-        renderSwipe(); // On s'assure de bien re-render l'écran de swipe
+        renderSwipe();
     });
 
-  // Attach product modal handlers for result items (SPA behaviour)
-  const resultButtons = resultsContainer.querySelectorAll('.btn-view-product');
-  resultButtons.forEach(btn => {
-    const idx = parseInt(btn.dataset.index, 10);
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const match = sortedMatches[idx];
-      if (match && match.product) {
-        try { showModal(match.product); } catch (err) { window.location.href = match.product.product_url || '#'; }
-      }
-    });
-  });
+  // ✅ Le bloc de code qui gérait le clic pour le pop-up a été entièrement supprimé. Le lien fonctionne maintenant tout seul.
 
     showAppScreen('results');
 }
 
 /* ========================================================== */
-/* ========= FIN DU BLOC À REMPLACER : renderResultsScreen ========= */
-/* ========================================================== */function bindGlobalEvents() {
+/* ========= FIN DU BLOC MODIFIÉ : renderResultsScreen ========= */
+/* ========================================================== */
+function bindGlobalEvents() {
     DOM.buttons.start.addEventListener('click', transitionToApp);
 
     const backBtn = document.getElementById('back-btn');
