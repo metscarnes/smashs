@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> SMASHS - Ta Rencontre Charnelle</title>
+    <title>🥩 SMASHS - Ta Rencontre Charnelle</title>
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/metscarnes/bimi-metscarnes/main/Logo%20Mets%20Carn%C3%A9s%20HD.png">
     <link href="https://db.onlinewebfonts.com/c/194ce65461099b38279d03e32740d78e?family=Loyola+Pro+Bold" rel="stylesheet" type="text/css"/>
     <link href="https://fonts.googleapis.com/css2?family=Playpen+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -403,43 +403,7 @@
         .nutrient-card .label { font-size: 0.65rem; color: var(--accent); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
         .nutrient-card .value { font-size: 1.5rem; font-weight: 700; color: var(--primary); margin-top: 0.5rem; }
         
-/* ========================================================== */
-/* ========= DÉBUT DU BLOC MODIFIÉ : Feedback Toast Compact ========= */
-/* ========================================================== */
 
-.feedback-toast {
-    position: relative;
-    bottom: auto;
-    left: auto;
-    background: rgba(4, 5, 8, 0.9);
-    backdrop-filter: blur(10px);
-    color: var(--text-light);
-    padding: 1rem 1.5rem;
-    border-radius: 8px;
-    border: 1px solid var(--border-subtle);
-    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-    font-family: 'Playpen Sans', sans-serif;
-    font-style: italic;
-    font-size: 0.95rem;
-    width: 100%;
-    max-width: 450px;
-    text-align: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.5s ease, transform 0.5s ease;
-    z-index: 20;
-    margin-bottom: 0.75rem; /* ✅ Marge inférieure réduite */
-    transform: scale(0.95); /* ✅ On utilise le scale pour l'animation d'entrée, ce qui n'affecte pas l'espacement vertical */
-}
-.feedback-toast.is-visible {
-    opacity: 1;
-    transform: scale(1); /* ✅ Animation de retour à la taille normale */
-    pointer-events: auto;
-}
-
-/* ========================================================== */
-/* ========= FIN DU BLOC MODIFIÉ : Feedback Toast Compact ========= */
-/* ========================================================== */
 
 /* ========================================================== */
 /* ======= BLOCS CSS POUR L'EXPANSION DES CARTES =========== */
@@ -492,6 +456,10 @@
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
+/* ========================================================== */
+/* ========= DÉBUT DU BLOC MODIFIÉ : Titre de la carte ========= */
+/* ========================================================== */
+
 /* Collapsed: show a compact info preview (name + chevron) */
 .card .card-info {
   max-height: 92px;
@@ -499,14 +467,19 @@
   transition: max-height 0.36s ease, padding 0.3s ease;
 }
 .card .card-info .card-name {
-  font-size: 1.6rem;
+  font-size: 1.49rem; // ✅
   font-weight: 700;
   display: block;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  min-width: 0; /* prevent long words from forcing parent width */
+  white-space: normal; /* ✅ C'EST LA CORRECTION CLÉ : autorise le retour à la ligne */
+  overflow: visible; /* ✅ On s'assure que le texte n'est pas coupé */
+  text-overflow: unset; /* ✅ On annule l'effet "..." */
+  min-width: 0; /* ✅ Empêche les mots longs de forcer la largeur du parent */
+  line-height: 1.2; /* ✅ Améliore l'espacement entre les lignes du titre */
 }
+
+/* ========================================================== */
+/* ========= FIN DU BLOC MODIFIÉ : Titre de la carte ========= */
+/* ========================================================== */
 
 /* When the card is expanded, allow the product name to wrap on multiple lines */
 .card.is-expanded .card-info .card-name {
@@ -1464,10 +1437,24 @@
 
 
 
+<!-- ✅ MODAL PRODUIT POUR AFFICHER LES DÉTAILS -->
+<div class="modal-overlay" id="product-modal-overlay">
+  <div class="modal-content product-modal-content">
+    <button class="modal-close-btn" id="product-modal-close">✕</button>
+    <div class="product-modal-header">
+      <h2 class="product-modal-title" id="product-modal-title"></h2>
+      <p class="product-modal-category" id="product-modal-category"></p>
+    </div>
+    <div class="product-modal-body" id="product-modal-body"></div>
+    <div class="product-modal-footer">
+      <a href="#" class="btn btn-primary product-modal-cta" id="product-modal-cta">
+        Votre date t'attend ici 💕
+      </a>
+    </div>
+  </div>
+</div>
 
-
-
-<!-- ✅ MODAL D’ALERTE GLOBAL -->
+<!-- ✅ MODAL D'ALERTE GLOBAL -->
 <div class="modal-overlay" id="alert-modal">
   <div class="modal-content" style="background:#1a1614;color:#F5F1E8;padding:1.5rem;border-radius:8px;max-width:400px;margin:auto;text-align:center;">
     <h2 id="alert-modal-title"></h2>
@@ -1527,7 +1514,6 @@ const DOM = {
             product: document.getElementById('product-modal-overlay') 
         },
         loadingBar: document.querySelector('.loading-bar'),
-        feedbackToast: document.getElementById('feedback-toast'),
     };
 
 // ✅ CORRECTION : 227 avec url
@@ -8340,7 +8326,7 @@ function transitionToApp() {
 }
 
 /* ========================================================== */
-/* ========= DÉBUT DU BLOC À DÉPLACER : renderSwipe ========= */
+/* ========= DÉBUT DU BLOC MODIFIÉ : renderSwipe ========= */
 /* ========================================================== */
 
 function renderSwipe() {
@@ -8357,13 +8343,13 @@ function renderSwipe() {
             </div>
             <div class="convergence-gauge-percent" id="convergence-percent">0%</div>
         </div>
-        <div id="feedback-toast" class="feedback-toast"></div>
+        
         <div class="card-deck" id="card-deck"></div>
         <div class="actions">
             <button class="action-btn undo" id="undo-btn">↩️</button>
             <button class="action-btn dislike" id="dislike-btn">❌</button>
             <button class="action-btn like" id="like-btn">❤️</button>
-        </div>`;
+        </div>`; // ✅ La div #feedback-toast a été supprimée ici.
     
     bindSwipeEvents(); 
     
@@ -8387,7 +8373,7 @@ function renderSwipe() {
 }
 
 /* ========================================================== */
-/* ========= FIN DU BLOC À DÉPLACER : renderSwipe ========= */
+/* ========= FIN DU BLOC MODIFIÉ : renderSwipe ========= */
 /* ========================================================== */
 
 /* ========================================================== */
@@ -8471,18 +8457,6 @@ function transitionToLoading() {
 /* ========= FIN DU BLOC MODIFIÉ : transitionToLoading (Avec Animations JS) ========= */
 /* ========================================================== */
 
-let feedbackTimeout;
-function showFeedbackMessage(message) {
-    const currentToast = document.getElementById('feedback-toast');
-    if (!currentToast) return;
-
-    clearTimeout(feedbackTimeout);
-    currentToast.textContent = message;
-    currentToast.classList.add('is-visible');
-    feedbackTimeout = setTimeout(() => {
-        currentToast.classList.remove('is-visible');
-    }, 10000);
-}
 
     const NUTRITIONAL_INFO_MAP = [ { key: 'Energie', label: 'Énergie', unit: 'kcal' }, { key: 'Proteines', label: 'Protéines', unit: 'g' }, { key: 'Lipides', label: 'Lipides', unit: 'g' }, { key: 'Glucides', label: 'Glucides', unit: 'g' }, { key: 'Sel', label: 'Sel', unit: 'g' }, { key: 'Fer', label: 'Fer', unit: 'mg' }, { key: 'Zinc', label: 'Zinc', unit: 'mg' }, { key: 'Selenium', label: 'Sélénium', unit: 'µg' }, { key: 'VitamineB12',label: 'Vitamine B12', unit: 'µg' } ];
     
@@ -8921,6 +8895,10 @@ if (!alreadyExists) {
 /* ========= FIN DU BLOC À REMPLACER : triggerFinalMatchAnimation ========= */
 /* ========================================================== */
 
+/* ========================================================== */
+/* ========= DÉBUT DU BLOC MODIFIÉ : refreshDeck ========= */
+/* ========================================================== */
+
 function refreshDeck() {
     if (state.user.nom === "ulyssecampiglia") { // ✅ Correction
         if (state.profile.interdits && state.profile.interdits.length > 0) {
@@ -8952,7 +8930,7 @@ function refreshDeck() {
 
     if (remaining.length === 0) {
         state.deck = [];
-        showFeedbackMessage("Vous avez vu tous les profils !");
+        // ✅ La ligne showFeedbackMessage a été supprimée ici.
         return;
     }
 
@@ -8964,6 +8942,10 @@ function refreshDeck() {
         console.log(`%c🔄 DECK CONSTRUIT`, 'color: #87CEEB; font-weight: bold;', `(${state.deck.length} cartes) Prochaines cartes : ${state.deck.slice(0, 3).map(p => p.Produit).join(', ')}`);
     }
 }
+
+/* ========================================================== */
+/* ========= FIN DU BLOC MODIFIÉ : refreshDeck ========= */
+/* ========================================================== */
     function calculateAndGetNextCard() {
         if (state.deck.length === 0) refreshDeck();
         return state.deck.shift() || null;
@@ -9109,7 +9091,7 @@ if (state.profile.Gout > 7.5 && state.profile.Tendrete < 5) {
             </div>
             <!-- ✅ FIN DU BLOC AJOUTÉ -->
 
-            <h1 class="profile-reveal-item" style="--delay: 0.4s;">Ton Profil Carnivore</h1>
+            <h1 class="profile-reveal-item" style="--delay: 0.4s; margin-top: 2rem;">Ton Profil Carnivore</h1>
             
             <h2 class="profile-reveal-item" style="color: var(--accent); font-style: italic; margin-bottom: 2rem; --delay: 0.5s;">"${finalTitle}"</h2>
             
@@ -9229,8 +9211,9 @@ function createCard(m, deckElement) {
 
     if (infoContent) {
         infoContent.addEventListener('click', (e) => {
-            e.stopPropagation(); 
-            c.classList.toggle('is-expanded');
+            e.stopPropagation();
+            // ✅ NOUVEAU : Ouvrir le modal au lieu d'expand
+            showProductModal(m);
         });
     }
 
@@ -9414,6 +9397,69 @@ function generateConvergenceHint() {
 /* ========================================================== */
 /* ========= FIN DU BLOC CORRIGÉ : generateConvergenceHint ========= */
 /* ========================================================== */
+/* ========================================================== */
+/* ========= FONCTION POUR AFFICHER LE MODAL PRODUIT ========= */
+/* ========================================================== */
+
+function showProductModal(product) {
+    const modal = document.getElementById('product-modal-overlay');
+    const title = document.getElementById('product-modal-title');
+    const category = document.getElementById('product-modal-category');
+    const body = document.getElementById('product-modal-body');
+    const cta = document.getElementById('product-modal-cta');
+    const closeBtn = document.getElementById('product-modal-close');
+
+    // Titre et catégorie
+    title.textContent = product.Nom || 'Produit';
+    category.textContent = product.Categorie || '';
+
+    // Construction du contenu
+    let bodyHTML = '';
+
+    // ✅ AFFICHER BIO_TEMPLATE AU LIEU DE DESCRIPTION
+    if (product.bio_template) {
+        const bioText = parseBioTemplate(product.bio_template, state.user);
+        bodyHTML += `<p style="font-style: italic; line-height: 1.8; margin-bottom: 1.5rem;">${bioText}</p>`;
+    }
+
+    // Valeurs nutritionnelles
+    if (product.Energie || product.Proteines || product.Lipides) {
+        bodyHTML += '<h3 style="color: var(--primary); margin-top: 1.5rem; margin-bottom: 0.75rem;">Valeurs nutritionnelles (pour 100g)</h3>';
+        bodyHTML += '<ul style="list-style: none; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">';
+        if (product.Energie) bodyHTML += `<li>⚡ Énergie: ${product.Energie} kcal</li>`;
+        if (product.Proteines) bodyHTML += `<li>💪 Protéines: ${product.Proteines}g</li>`;
+        if (product.Lipides) bodyHTML += `<li>🥑 Lipides: ${product.Lipides}g</li>`;
+        if (product.Glucides) bodyHTML += `<li>🌾 Glucides: ${product.Glucides}g</li>`;
+        if (product.Fer) bodyHTML += `<li>⚙️ Fer: ${product.Fer}mg</li>`;
+        if (product.Zinc) bodyHTML += `<li>✨ Zinc: ${product.Zinc}mg</li>`;
+        bodyHTML += '</ul>';
+    }
+
+    // Interdits alimentaires
+    if (product.Interdits && product.Interdits !== 'Aucun') {
+        bodyHTML += `<p style="margin-top: 1rem; color: var(--danger);"><strong>⚠️ Interdits:</strong> ${product.Interdits}</p>`;
+    }
+
+    body.innerHTML = bodyHTML;
+
+    // Configuration du CTA (✅ PAS DE target="_blank")
+    if (product.product_url) {
+        cta.href = product.product_url;
+        cta.style.display = 'block';
+    } else {
+        cta.style.display = 'none';
+    }
+
+    // Gestion de la fermeture
+    closeBtn.onclick = () => modal.classList.remove('is-visible');
+    modal.onclick = (e) => {
+        if (e.target === modal) modal.classList.remove('is-visible');
+    };
+
+    // Afficher le modal
+    modal.classList.add('is-visible');
+}
+
 /* ========================================================== */
 /* ========= DÉBUT DU BLOC À REMPLACER : showCustomAlert ========= */
 /* ========================================================== */
@@ -9742,9 +9788,13 @@ saveSession();
 DOM.appScreens.questions.querySelectorAll('.answer-card').forEach(c => c.classList.remove('selected')); e.classList.add('selected'); DOM.appScreens.questions.querySelectorAll('.answer-card').forEach(c => c.style.pointerEvents = 'none'); nextQuestion();saveSession(); }
     function nextQuestion() { const c = state.currentScreen === 'intro' ? DOM.appScreens.intro : DOM.appScreens.questions; c.classList.add('is-exiting'); setTimeout(() => { if (state.currentScreen === 'intro') { showAppScreen('questions'); renderQuestionStep(); } else { state.currentStep++; renderQuestionStep(); } c.classList.remove('is-exiting'); }, 400); }
     
+/* ========================================================== */
+/* ========= DÉBUT DU BLOC MODIFIÉ : handleUndoSwipe ========= */
+/* ========================================================== */
+
 function handleUndoSwipe() {
     if (!state.lastSwipedCard) {
-        showFeedbackMessage("Rien à annuler.");
+        // ✅ La ligne showFeedbackMessage a été supprimée ici.
         return;
     }
 
@@ -9773,10 +9823,13 @@ function handleUndoSwipe() {
     }
     
     updateConvergenceGauge();
-    showFeedbackMessage(`"${meat.Produit}" est de retour !`);
+    // ✅ La ligne showFeedbackMessage a été supprimée ici.
     saveSession();
 }
-    function initCardHammer(c) {
+
+/* ========================================================== */
+/* ========= FIN DU BLOC MODIFIÉ : handleUndoSwipe ========= */
+/* ========================================================== */    function initCardHammer(c) {
         if (c.hammerInitialized) return;
         c.hammerInitialized = true;
     // touchAction 'none' empêche le navigateur d'interpréter les gestes
@@ -9858,6 +9911,10 @@ function handleUndoSwipe() {
     }
   }
 
+/* ========================================================== */
+/* ========= DÉBUT DU BLOC MODIFIÉ : animateSwipe ========= */
+/* ========================================================== */
+
 function animateSwipe(card, direction) {
   // Prevent double-processing of the same card
   if (card.dataset.processed) return;
@@ -9901,38 +9958,25 @@ function animateSwipe(card, direction) {
                 state.profileHistory.push(JSON.parse(JSON.stringify(state.profile)));
                 if (state.profileHistory.length > 20) state.profileHistory.shift();
                 
-                const feedbackFinal = generateFeedbackForSwipe(meat, direction);
-                showFeedbackMessage(feedbackFinal);
+                // ✅ Les deux lignes suivantes qui géraient le feedback ont été supprimées.
                 
                 updateConvergenceGauge(); 
-
-/* ========================================================== */
-/* ========= DÉBUT DU BLOC MODIFIÉ : Logique de Notification d'Astuce ========= */
-/* ========================================================== */
 
                 const minSwipesForHint = 4;
                 if (state.swipeHistory.length >= minSwipesForHint) {
                     const currentHint = generateConvergenceHint();
                     
-                    // On ne notifie l'utilisateur que si l'astuce est nouvelle ET pertinente
-                    if (currentHint.text !== state.lastHintPresented && currentHint.isSignificant) { // ✅ On vérifie maintenant si l'astuce est pertinente
+                    if (currentHint.text !== state.lastHintPresented && currentHint.isSignificant) {
                         state.hasNewHint = true;
                         updateConvergenceGauge();
                     }
                 }
 
-/* ========================================================== */
-/* ========= FIN DU BLOC MODIFIÉ : Logique de Notification d'Astuce ========= */
-/* ========================================================== */
-
         if (direction === 1 && checkForConvergence()) {
-          // Defer final match creation to the next animation frames to
-          // avoid racing with other DOM/state updates from animateSwipe.
           const deckEl = document.querySelector('#card-deck');
           const savedMeat = meat;
           requestAnimationFrame(() => {
             requestAnimationFrame(() => {
-              // Re-check convergence in case state changed meanwhile
               if (!checkForConvergence()) {
                 saveSession();
                 return;
@@ -9962,51 +10006,15 @@ function animateSwipe(card, direction) {
         state.isAnimating = false;
     }
 }
+
+/* ========================================================== */
+/* ========= FIN DU BLOC MODIFIÉ : animateSwipe ========= */
+/* ========================================================== */
     function capitalize(s) {
         if (typeof s !== 'string' || !s) return '';
         return s.charAt(0).toUpperCase() + s.slice(1);
     }
-function generateFeedbackForSwipe(meat, direction) {
-    const action = direction === 1 ? 'like' : 'dislike';
-    const prenom = (state.user.nom && state.user.nom.trim()) ? capitalize(state.user.nom) : null;
-    const { articleDef } = getArticleEtAdjectif(meat.Produit, meat.Genre);
-    const nomComplet = `${articleDef}${meat.Produit}`;
 
-    const metsPhrase = generateNarrativeFeedback(state.user, state.profile, "swipe", action, meat.Categorie);
-
-    const hook = action === 'like' ? 
-        pickUnique([
-            `Un bon choix avec ${nomComplet}.`,
-            `Bien vu pour ${nomComplet}.`,
-            `Validé ! ${nomComplet} rejoint vos favoris.`,
-            `${nomComplet}... Intéressant.`
-        ]) :
-        pickUnique([
-            `Pas de coup de foudre avec ${nomComplet}.`,
-            `Visiblement, ${nomComplet} ne vous convainc pas.`,
-            `${nomComplet} ne passe pas le test, on dirait.`
-        ]);
-
-    const finalPhrase = `${hook} ${metsPhrase.charAt(0).toLowerCase() + metsPhrase.slice(1)}`;
-    
-    if (!state.loggedProducts.has(formatProduitAvecArticle(meat.Produit))) {
-        let journal = JSON.parse(localStorage.getItem("mets_journal") || "[]");
-        const logEntry = {
-            time: new Date().toLocaleTimeString(),
-            produit: formatProduitAvecArticle(meat.Produit),
-            prenom: prenom || "toi",
-            type: action.toUpperCase(),
-            phrase: finalPhrase,
-            style: state.user.styleNarratif || "—",
-            phase: "swipe"
-        };
-        journal.push(logEntry);
-        localStorage.setItem("mets_journal", JSON.stringify(journal));
-        if (typeof logMETS === "function") logMETS(logEntry);
-        state.loggedProducts.add(logEntry.produit);
-    }
-    return finalPhrase;
-}
 function saveSession() {
     try {
         const sessionData = {
@@ -10227,95 +10235,7 @@ function activateDebugTools() {
 
 }); // Close the DOMContentLoaded event listener
 
-// ============================================================
-// CONSOLE VISUELLE M.E.T.S ET GESTION CLAVIER
-// ============================================================
-(function () {
-  const panel = document.createElement("div");
-  panel.id = "mets-debug-panel";
-  Object.assign(panel.style, {
-    position: 'fixed', bottom: '10px', right: '10px', width: '340px', maxHeight: '320px',
-    overflowY: 'auto', fontFamily: 'monospace', fontSize: '12px', background: 'rgba(0,0,0,0.8)',
-    color: '#F5F1E8', border: '1px solid #cc8956', borderRadius: '6px',
-    padding: '8px 10px 10px 10px', boxShadow: '0 0 10px rgba(0,0,0,0.4)',
-    display: 'none', zIndex: '9999'
-  });
-  document.body.appendChild(panel);
 
-  const header = document.createElement("div");
-  header.textContent = "🧭 M.E.T.S Debug (M pour masquer)";
-  Object.assign(header.style, { fontWeight: 'bold', color: '#cc8956', marginBottom: '6px', position: 'relative' });
-  panel.appendChild(header);
-
-  const copyBtn = document.createElement("button");
-  copyBtn.textContent = "📋 Copier";
-  Object.assign(copyBtn.style, { position: 'absolute', top: '0', right: '85px', background: '#8B7355', color: 'white', border: 'none', padding: '3px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px' });
-  
-  const clearBtn = document.createElement("button");
-  clearBtn.textContent = "🗑️ Clear";
-  Object.assign(clearBtn.style, { position: 'absolute', top: '0', right: '10px', background: '#50241c', color: 'white', border: 'none', padding: '3px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '11px' });
-
-  header.appendChild(copyBtn);
-  header.appendChild(clearBtn);
-
-  const logContainer = document.createElement("div");
-  panel.appendChild(logContainer);
-
-  copyBtn.onclick = () => {
-    const journal = JSON.parse(localStorage.getItem("mets_journal") || "[]");
-    if (journal.length === 0) {
-      copyBtn.textContent = "❌ Vide";
-      setTimeout(() => (copyBtn.textContent = "📋 Copier"), 1500);
-      return;
-    }
-    const text = [...journal].reverse().map(e => `[${e.time}] ${e.type} ${e.produit}\n${e.phrase}\n${e.style} • ${e.phase}`).join("\n\n");
-    navigator.clipboard.writeText(text).then(() => {
-        copyBtn.textContent = "✅ Copié !";
-        setTimeout(() => (copyBtn.textContent = "📋 Copier"), 1500);
-    }).catch(() => {
-        copyBtn.textContent = "⚠️ Erreur";
-        setTimeout(() => (copyBtn.textContent = "📋 Copier"), 1500);
-    });
-  };
-
-  clearBtn.onclick = () => {
-    if (!confirm("⚠️ Vider complètement le journal M.E.T.S ?")) return;
-    localStorage.removeItem("mets_journal");
-    logContainer.innerHTML = "<i>(Journal effacé)</i>";
-    clearBtn.textContent = "✅ Effacé";
-    setTimeout(() => (clearBtn.textContent = "🗑️ Clear"), 1500);
-  };
-
-  window.logMETS = function (entry) {
-    if (!panel || !logContainer) return;
-    const line = document.createElement("div");
-    line.innerHTML = `<div style="margin-bottom:4px;border-bottom:1px dashed #444;padding-bottom:2px;"><span style="color:#888;">[${entry.time}]</span> <span style="color:#cc8956;">${entry.type}</span> <span style="color:#F5F1E8;">${entry.produit}</span><br><span style="color:#F5F1E8;">${entry.phrase}</span><br><span style="color:#777;">${entry.style} • ${entry.phase}</span></div>`;
-    logContainer.prepend(line);
-    // Trim the log to the most recent 50 entries
-    while (logContainer.children.length > 50) {
-      logContainer.removeChild(logContainer.lastChild);
-    }
-  };
-
-})(); // Close the debug panel IIFE
-
-</script>
-</body>                const key = keys[Math.floor(Math.random() * keys.length)];
-                jitter[key] = Math.max(0, Math.min(10, jitter[key] + (Math.random() - 0.5) * 0.2));
-                drawRadar(jitter, 'profile-radar-svg');
-            }
-        }, 3000);
-    }
-
-  init();
-
-  })(); // Close the main IIFE
-
-}); // Close the DOMContentLoaded event listener
-
-// ============================================================
-// CONSOLE VISUELLE M.E.T.S ET GESTION CLAVIER
-// ============================================================
 (function () {
   const panel = document.createElement("div");
   panel.id = "mets-debug-panel";
